@@ -1,0 +1,16 @@
+<div class="d-flex flex-wrap justify-content-center">
+    <!-- <div class="container"> -->
+        <div *ngFor="let spinner of spinners; let i = index " (click)="Randon(); vibrar2()">
+          <div *ngIf="i == id">
+              <div class="ngx-foreground-spinner spinner-container">
+                  <div [class]="spinner.class">
+                    <div *ngFor="let div of spinner.divs"></div>
+                  </div>
+                </div>
+                <!-- <div class="spinner-name">
+                  <span class="badge badge-info text-white">{{spinner.name}}</span>
+                </div> -->
+          </div>
+        </div>
+    <!-- </div> -->
+  </div>

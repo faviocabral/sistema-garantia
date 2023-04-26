@@ -1,0 +1,310 @@
+<div class="container mt-2">
+  <!-- Main node for this component -->
+  <div class="card card-danger">
+    <div class="card-header">
+      <h3 class="card-title">
+        <strong>SOLICITUD GARANTIA</strong> 
+      </h3>
+    </div>
+    <!-- /.card-header -->
+    <!-- form start -->
+    <form id="form1" class="was-validated">
+      <div class="card-body p-0 ">
+        <!--
+            <div class="progress" style="height: 35px; font-size: 18px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning mr-1" style="width:33%;" id="pSolicitud">
+                    <span>
+                        <strong>Solicitud</strong>
+                        <i class="fa fa-question-circle fa-lg ml-1" id="noSolicitud" aria-hidden="true"></i>
+                        <i class="fa fa-check-circle fa-lg ml-1" id="siSolicitud" aria-hidden="true" style="display:none"></i>
+                    </span>
+                </div>
+                <div class="progress-bar bg-info mr-1" style="width:33%" id="pTaller">
+                    <span>
+                        <strong>Jefe Taller</strong>
+                        <i class="fa fa-question-circle fa-lg ml-1" id="noTaller" aria-hidden="true"></i>
+                        <i class="fa fa-check-circle fa-lg ml-1" id="siTaller" aria-hidden="true" style="display:none;"></i>
+                    </span>
+                </div>
+                <div class="progress-bar bg-info" style="width:36%" id="pGarantia">
+                    <span>
+                        <strong>Jefe Garantia</strong>
+                        <i class="fa fa-question-circle fa-lg ml-1" id="noGarantia" aria-hidden="true"></i>
+                        <i class="fa fa-check-circle fa-lg ml-1" id="siGarantia" aria-hidden="true" style="display: none;"></i>
+                    </span>
+                </div>
+              </div>
+            -->
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="idSolicitud"><i class="fa fa-bookmark" aria-hidden="true"></i> NRO SOLICITUD:</label>
+              <input type="text" class="form-control" id="id" name="id" placeholder="Solicitud" readonly>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="exampleInputEmail1"><i class="fa fa-star" aria-hidden="true"></i> ESTADO:</label>
+              <input type="text" class="form-control" id="estado" name="estado" placeholder="Estado" value="NUEVO"
+                readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-6">
+              <label for="exampleInputEmail1"><i class="fa fa-cogs" aria-hidden="true"></i> OT:</label>
+              <div class="input-group">
+                  <input type="text" class="form-control" id="ot" name="ot" placeholder="Nro de Orden" readonly>
+                  <div class="input-group-append">
+                    <button class="btn btn-danger pb-0 pt-0 pl-2 pr-2 elevation-1" type="button" (click)="linkCM()" ><strong><i class="fa fa-camera" aria-hidden="true" style="font-size: 26px;"></i></strong> </button>
+                  </div>
+              </div>                
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="exampleInputEmail1"><i class="fa fa-university" aria-hidden="true"></i> AREA:</label>
+                <input type="text" class="form-control" id="area" name="area" placeholder="AREA" value="SOLICITUD"
+                  readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="exampleInputEmail1"><i class="fa fa-user" aria-hidden="true"></i> Cliente:</label>
+              <input type="text" class="form-control" id="cliente" name="cliente" placeholder="cliente" readonly>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-taxi" aria-hidden="true"></i> Vin:</label>
+              <input type="text" class="form-control" id="vin" name="vin" placeholder="vin" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-tags" aria-hidden="true"></i> Modelo:</label>
+              <input type="text" class="form-control" id="modelo" name="modelo" placeholder="Modelo" readonly>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-calendar" aria-hidden="true"></i> Año:</label>
+              <input type="text" class="form-control" id="anho" name="anho" placeholder="año" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-calendar" aria-hidden="true"></i> Fecha Venta:</label>
+              <input type="text" class="form-control" id="fechaVenta" name="fechaVenta" placeholder="fecha" readonly>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-calendar" aria-hidden="true"></i> Fecha Reclamo:</label>
+              <input type="text" class="form-control" id="fecha" name="fecha" placeholder="fecha" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-sun" aria-hidden="true"></i> kilometraje:</label>
+              <input type="text" class="form-control text-uppercase" id="km" name="km" placeholder="Kilometraje.."
+                readonly>
+
+              <label for=""><i class="fa fa-barcode mt-3" aria-hidden="true"></i> VDN</label>
+              <input type="text" class="form-control text-uppercase" id="vdn" name="vdn" placeholder="ingrese VDN.."
+                required>
+
+                <label for=""><i class="fa fa-barcode mt-3" aria-hidden="true"></i> Tipo Garantia</label>
+                  <select class="form-control" id="tipoGarantia" name="tipoGarantia" required>
+                    <option value=""></option>
+                    <option value="GARANTIA DE FABRICA">Garantia de Fabrica</option>
+                    <option value="GARANTIA DE REPUESTOS">Garantia de Repuestos</option>
+                    <option value="CAMPAÑA">Campaña</option>
+                    <option value="GOODWILL">GoodWill</option>
+                  </select>                  
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <label for=""><i class="fa fa-wrench" aria-hidden="true"></i> Ultimos Servicios</label>
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs mb-1">
+              <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#garden"> <strong>GARDEN</strong> </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#terceros"> <strong>TERCERIZADO</strong> </a>
+              </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <div id="garden" class="container tab-pane active">
+                <div class="table-responsive p-0">
+                  <table class="table table-bordered table-striped table-sm table-hover text-nowrap">
+                    <thead>
+                      <tr>
+                        <th>Nro</th>
+                        <th>Fecha</th>
+                        <th>Service</th>
+                        <th>Km</th>
+                      </tr>
+                    </thead>
+                    <tbody id="detServicio">
+                      <tr>
+                        <td colspan="4" style="text-align:center;">
+                          <div class="spinner-grow text-danger"></div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div id="terceros" class="container tab-pane fade">
+                <div class="table-responsive p-0">
+
+                  <form id="formSer">
+                    <div class="row">
+                      <div class="col-sm-12 pr-0">
+                        <input type="text" class="form-control" placeholder="Taller?" id="tallerST"  required>
+                      </div>                      
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-5 pr-0">
+                          <input type="text" class="form-control" placeholder="Fecha ddmmaaaa" id="fechaST"  mask="00-00-0000" required>
+                        </div>
+                        <div class="col-sm-7 ml-0">
+                          <input type="text" class="form-control" placeholder="Km entrada.." id="kilometrajeST" mask="separator.0" thousandSeparator="." separatorLimit="200000" required>
+                        </div>
+                    </div>
+                      <div class="d-flex">
+                        <input type="text" class="form-control" placeholder="Km Servicio?" id="servicioST" mask="separator.0" thousandSeparator="." separatorLimit="200000" required>
+                        <button type="button" id="bServicioTercero" (click)="agregarServicioTercero()" class="btn btn-primary ml-1 mb-1"
+                        style="position: relative; float: right; border-radius:10px;">
+                        <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                  </form> 
+
+                  <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1">
+                    <thead>
+                      <tr>
+                        <th>Nro</th>
+                        <th>Fecha</th>
+                        <th>Service</th>
+                        <th>Km</th>
+                        <th>Taller</th>
+                      </tr>
+                    </thead>
+                    <tbody id="detServicioTercero">
+                    </tbody>
+                  </table>
+                  <div class="d-flex justify-content-center mb-1 mt-1">
+                    <button type="button" id="bInsertarServicioTercero"  (click)="insertarServicioTercero()" class="btn btn-primary ml-1 mb-1"
+                    style=" border-radius:10px; display: none;">Insertar</button>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-12">
+            <div class="form-group">
+              <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> Reclamo del Cliente:</label>
+              <input type="text" class="form-control" id="pedido" name="pedido" placeholder="Reclamo del Cliente"
+                readonly>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row mr-1 ml-1">
+          <div class="col">
+            <h4 class="bg-danger rounded"><i class="fa fa-database ml-1" aria-hidden="true"></i> DETALLE DE LA SOLICITUD
+            </h4>
+
+            <div class="row mb-2">
+              <div class="col-sm-12" style="display: inline-flex;">
+                <input type="text" class="form-control" id="incidente"
+                  placeholder="ingrese el incidente" required>
+              </div>
+              <div class="col-sm-6">
+                <input type="text" class="form-control" motivoReclamo="piezaSolicitada" id="piezaSolicitada"
+                  placeholder="ingrese la pieza" required>
+              </div>
+              <div class="col-sm-6" style="display: inline-flex;">
+                <input type="text" class="form-control" id="motivoReclamo" placeholder="ingrese motivo.." required>
+              </div>
+              <div class="col-sm-3" style="display: inline-flex;">
+                <input type="text" class="form-control mb-1" id="cantidad" placeholder="ingrese cantidad.." required>
+              </div>
+             
+              <div class="col-sm-9" style="display: inline-flex;">
+                  <input type="text" class="form-control" id="reparacion"
+                  placeholder="ingrese descripcion de la reparacion.." required>
+                <button type="button" id="bSolicitarPieza" (click)="solicitarPieza()" class="btn btn-primary ml-1"
+                  style="position: relative; float: right; border-radius:10px;">
+                  <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="col-sm-12">
+                <div class="form-check ml-1 mt-2 mb-2">
+                  <label class="form-check-label" for="check2">
+                    <input type="checkbox" class="form-check-input" id="piezaCausal" name="piezaCausal" value="SI" style="transform: scale(1.5);"><strong>Pieza Cuasal?</strong>
+                  </label>
+                </div>              
+              </div>
+              
+            </div>
+
+            <div class="table-responsive" style="border-radius: 5px;">
+              <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-3" id="detalle">
+                <thead>
+                  <tr>
+                    <th class="pl-1 pr-1">Nro</th>
+                    <th>Incidente</th>
+                    <th>Piezas Solicitadas</th>
+                    <th>Motivo reclamo</th>
+                    <th>Reparacion</th>
+                    <th>Pieza Causal</th>
+                    <th>Estado</th>
+                    <th class="pl-1 pr-1" style="text-align: center;"><i class="fa fa-cogs" aria-hidden="true"></i></th>
+                  </tr>
+                </thead>
+                <tbody id="piezasSolicitadas">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- /.card-body -->
+
+      <div class="card-footer">
+        <button type="button" id="bSolicitar" class="btn btn-primary" (click)="solicitar()"
+          style="position: relative; float: right;">Solicitar</button>
+          <button type="button" style="position: relative; float: right;" class="btn btn-warning mr-3"><i class="fa fa-print" aria-hidden="true"></i> Imprimir</button>
+
+      </div>
+    </form>
+  </div>
+</div>

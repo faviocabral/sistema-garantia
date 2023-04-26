@@ -1,0 +1,29 @@
+<div class="login-box" style="margin-left: 20%; margin-right: auto;">
+  <div class="login-logo">
+    <a><b>GRUPO</b>GARDEN</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Ingresar al sistema</p>
+
+      <form class="was-validated">
+        <div class="input-group mb-3">
+          <input type="text" formControlName="username" id="usuario" class="form-control" placeholder="Usuario"
+            required>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" formControlName="password" id="pass" class="form-control" placeholder="Password"
+            required (keyup.enter)="login()" >
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <button type="button" class="btn btn-primary btn-block" (click)="login()">Ingresar</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>

@@ -1,0 +1,124 @@
+<div class="card m-1" style=" display: flex; flex:1; height: 560px;">
+  <!--
+    <div class="card-header pb-0 pt-1">
+        <div class="row d-flex justify-content-between">
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon elevation-1" style="background-color: 	#8fbc8f;"><i class="fas fa-cog"></i></span>
+  
+                <div class="info-box-content">
+                  <span class="info-box-text" >SOLICITUD</span>
+                  <span class="info-box-number d-flex" style="font-size: 24px; height: 40px;">
+
+                    <span class="badge badge-info  elevation-1 " style="padding-top: 7%;">N10</span> 
+                    <span class="badge badge-warning  elevation-1 flex-fill mr-1" style="padding-top: 7%;">P10</span>
+                    <span class="badge badge-danger  elevation-1 flex-fill" style="padding-top: 7%;">R10</span>
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+  
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box mb-3">
+                <span class="info-box-icon elevation-1" style="background-color: 	#daa520;"><i class="fa fa-wrench" aria-hidden="true"></i></span>
+  
+                <div class="info-box-content">
+                  <span class="info-box-text">TALLER</span>
+                  <span class="info-box-number d-flex" style="font-size: 24px; height: 40px;">
+
+                    <span class="badge badge-info  elevation-1 flex-fill mr-1" >N10</span> 
+                    <span class="badge badge-warning  elevation-1 flex-fill mr-1" >P10</span>
+                    <span class="badge badge-danger  elevation-1 flex-fill" >R10</span>
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box mb-3">
+                <span class="info-box-icon elevation-1" style="background-color: #87cefa	;"><i class="fas fa-users"></i></span>
+  
+                <div class="info-box-content">
+                  <span class="info-box-text">GARANTIA</span>
+                    <span class="info-box-number d-flex" style="font-size: 24px; height: 40px;">
+
+                      <span class="badge badge-info  elevation-1 flex-fill mr-1" >N10</span> 
+                      <span class="badge badge-warning  elevation-1 flex-fill mr-1" >P10</span>
+                      <span class="badge badge-danger  elevation-1 flex-fill" >R10</span>
+
+                    </span>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box mb-3">
+                <span class="info-box-icon elevation-1" style="background-color: #bc8f8f;"><i class="fas fa-users"></i></span>
+  
+                <div class="info-box-content">
+                  <span class="info-box-text">REPUESTO</span>
+                  <span class="info-box-number d-flex" style="font-size: 24px; height: 40px;">
+
+                    <span class="badge badge-info  elevation-1 flex-fill mr-1">N10</span> 
+                    <span class="badge badge-warning  elevation-1 flex-fill mr-1" >P10</span>
+                    <span class="badge badge-danger  elevation-1 flex-fill" >R10</span>
+
+                  </span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+    </div>
+  -->
+    <div class="card-body p-1">
+      <div class="row">
+        <span style="font-size: 28px; margin-left: auto; margin-right: auto; float: right; position: relative;"><strong>LISTADO PENDIENTES</strong></span>
+      </div>
+      <div class="row">
+        <form id="formBuscar" class="form-inline ml-2" style="width: 100%;" >
+          <input type="text" id="buscar" class="form-control mb-2 mr-sm-2" placeholder="Ingrese Nro OT" (keyup.enter)="buscarOT(1)">
+          <button type="button" (click)="buscarOT(1)" class="btn btn-primary mb-2 elevation-1"><strong>Buscar</strong></button>
+          <button type="button" (click)="pendientes()" class="btn btn-danger mb-2 ml-2 elevation-1"><strong>Refrescar</strong></button>
+        </form> 
+      </div> 
+        <div class="table-responsive table-bordered" id="pendientes">
+            <table class="table table-sm table-head-fixed text-nowrap m-0 table-hover" style="min-height: 100px;">
+                <thead id="cab" style="background-color: #dc3545;"></thead>
+                <tbody id="det" style="font-size:14px;"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!--
+<div class="container-fluid p-1" style="height:575px; display:flex; flex-direction:row; flex: 1">
+    <div class="card" style="width: 100%;">
+        <div class="card-header">
+            <h4>Listado de Pendientes !</h4>
+        </div>
+        <div class="card-body p-1">
+            <div class="table-responsive">
+                <table class="table m-0">
+                    <thead id="cab"></thead>
+                    <tbody id="det"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+-->
