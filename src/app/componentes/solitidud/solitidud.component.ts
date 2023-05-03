@@ -157,6 +157,11 @@ ngOnDestroy(){
                   body += '<td><span class="badge badge-info">' + datos[index]['estado2'] + '</span></td>'
                 }
 
+                body += '<td>' + datos[index]['codigoRep'] ?? ''
+                body += '</td>' + '<td>' + datos[index]['nombreRep'] ?? '' + '</td>' 
+                body += '</td>' + '<td>' + datos[index]['codigoRemision'] ?? '' + '</td>' 
+
+
                 //'<td><span class="badge badge-info">'+ datos[index]['estado']   +'</span></td>'+
                 body += '<td></td>'; //columna de los botones... 
                 body += '</tr>';
@@ -167,9 +172,12 @@ ngOnDestroy(){
               $("#area").val(datos[0]['area']);//se recupera de la primera fila .
               $("#estado").val(datos[0]['estado']);//se recupera de la primera fila .
               $("#id").val(datos[0]['id']);//se recupera de la primera fila .
+              $("#mecanico").val(datos[0]['mecanico']);//se recupera de la primera fila .
+              $("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
 
               $("#vdn").attr('readonly', true);
               $("#tipoGarantia").attr("disabled", true); 
+              $("#mecanico").attr("disabled", true); 
               document.querySelector('#piezasSolicitadas').innerHTML = body;
               datos.forEach(item=>{
                 document.getElementById('det-'+item.idDet).addEventListener('dblclick', async(x) => {
@@ -302,6 +310,7 @@ ngOnDestroy(){
     }else{
       fila += '<td style=" font-size:18px;"> <span class="badge badge-warning"> <strong>NUEVO</strong> </span> </td>'; // Estado 
     }
+    fila += '<td></td><td></td>'
     fila += '<td style="text-align: center;" class="pl-1 pr-1"> <button type="button" id="b' + valor + '" class="btn btn-danger btn-sm" > <i class="fa fa-trash-alt" aria-hidden="true"></i></button> </td>';
     fila += "</tr>";
     document.getElementById("piezasSolicitadas").innerHTML += fila;
@@ -325,7 +334,7 @@ ngOnDestroy(){
 
   }
 
-  solicitar() {
+  async solicitar() {
 
     //si alguien habilitado 
     if ($("#estado").val() == 'PENDIENTE') {
@@ -417,11 +426,41 @@ ngOnDestroy(){
         return;
       }
 
+      if ($("#mecanico").val().trim().length == 0) {
+        swal.fire('Debe ingresar el nombre del mecanico !!!', '', 'warning');
+        $("#mecanico").focus();
+        return;
+      }
+
+      if ($("#tipoGarantia").val().trim().length == 0) {
+        swal.fire('Debe ingresar Tipo de Garantia !!!', '', 'warning');
+        $("#tipoGarantia").focus();
+        return;
+      }
+
       if ($("#piezasSolicitadas tr").length == 0) {
         swal.fire('Debe ingresar registros en el Detalle !!', '', 'warning');
         $("#piezasolicitada").focus();
         return;
       }
+
+      //controlamos si ya adjunto las fotos a la solicitud 
+      var url;
+      var servidor = window.location.origin;
+      if (servidor.indexOf('localhost') >0 ){
+        url = "http://192.168.10.54:3010/garantia-fotos";
+      }else{
+        url = servidor + "/garantia-fotos";
+      }
+      await fetch(url + '/' + $("#ot").val())
+      .then(response => response.json())  // convertir a json
+      .then(json => {
+        console.log('tiene imagenes... ',json)
+        if(json?.foto === '' ){
+          alert('Atencion, Olvido adjuntar imagenes que respalden la solicitud indicando el nro de OT al cual corresonde!!!')
+        }
+      })
+      .catch(err => console.log('Solicitud fallida', err)); // Capturar errores
 
       var valor = $("#form1").serializeArray();
       //agregar el usuario loggeado 
@@ -429,7 +468,7 @@ ngOnDestroy(){
       //console.log('valores del array.. ');
       //console.log(valor);
       var servidor = window.location.origin;
-      var url;
+
       if (servidor.indexOf('localhost') >0 ){
         url = "http://192.168.10.54:3010/garantia-ins-cab";
       }else{

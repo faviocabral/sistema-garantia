@@ -125,10 +125,18 @@
               <input type="text" class="form-control text-uppercase" id="km" name="km" placeholder="Kilometraje.."
                 readonly>
 
-              <label for=""><i class="fa fa-barcode mt-3" aria-hidden="true"></i> VDN</label>
-              <input type="text" class="form-control text-uppercase" id="vdn" name="vdn" placeholder="ingrese VDN.."
-                required>
+                <label for=""><i class="fa fa-barcode mt-3" aria-hidden="true"></i> VDN</label>
+                <input type="text" class="form-control text-uppercase" id="vdn" name="vdn" placeholder="ingrese VDN.."
+                  required>
 
+                <label for=""><i class="fa fa-barcode mt-3" aria-hidden="true"></i> Jefe Grupo</label>
+                <input type="text" class="form-control text-uppercase" id="jefeGrupo" name="jefeGrupo" placeholder="Jefe Grupo.."
+                  readonly>
+
+                  <label for=""><i class="fa fa-barcode mt-3" aria-hidden="true"></i> Mecanico</label>
+                  <input type="text" class="form-control text-uppercase" id="mecanico" name="mecanico" placeholder="ingrese Nombre Mecanico.."
+                    required>
+      
                 <label for=""><i class="fa fa-barcode mt-3" aria-hidden="true"></i> Tipo Garantia</label>
                   <select class="form-control" id="tipoGarantia" name="tipoGarantia" required>
                     <option value=""></option>
@@ -286,6 +294,9 @@
                     <th>Reparacion</th>
                     <th>Pieza Causal</th>
                     <th>Estado</th>
+                    <th>Codigo</th>
+                    <th>Repuesto</th>
+                    <th>Remision</th>
                     <th class="pl-1 pr-1" style="text-align: center;"><i class="fa fa-cogs" aria-hidden="true"></i></th>
                   </tr>
                 </thead>

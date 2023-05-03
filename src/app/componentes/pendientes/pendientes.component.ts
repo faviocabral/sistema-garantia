@@ -180,6 +180,9 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                   '<th class="border border-white">Repuesto</th>'+ 
                   '<th class="border border-white">Motivo</th>'+ 
                   '<th class="border border-white">Reparacion</th>'+ 
+                  '<th class="border border-white">Remision CodRepuesto</th>'+ 
+                  '<th class="border border-white">Remision Repuesto</th>'+ 
+                  '<th class="border border-white">Remision Nro</th>'+ 
                 '</tr>'+ 
                 //detalle 
                 '<tr>'+ 
@@ -202,6 +205,9 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                   '<td>'+ listado[0][index]['repuesto'] +'</td>'+
                   '<td>'+ listado[0][index]['motivo'] +'</td>'+
                   '<td>'+ listado[0][index]['reparacion'] +'</td>'+
+                  '<td>'+ listado[0][index]['codigoRep'] +'</td>'+
+                  '<td>'+ listado[0][index]['nombreRep'] +'</td>'+
+                  '<td>'+ listado[0][index]['codigoRemision'] +'</td>'+
                 '</tr>';
     
           }else { //si no es fila uno 
@@ -226,6 +232,12 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                           '<td>'+ listado[0][index]['repuesto'] +'</td>'+
                           '<td>'+ listado[0][index]['motivo'] +'</td>'+
                           '<td>'+ listado[0][index]['reparacion'] +'</td>'+
+                          '<td>'+ listado[0][index]['codigoRep'] +'</td>'+
+                          '<td>'+ listado[0][index]['nombreRep'] +'</td>'+
+                          '<td>'+ listado[0][index]['codigoRemision'] +
+                          '</td>'+
+
+        
                         '</tr>'; 
           }
           //cuando llegue a la ultima fila del detalle cierra el bloque 
@@ -261,7 +273,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
   
           for(let x = 0; x < cab.length; x++){ 
             //solo fila 1 carga y que no sean del detalle repuesto y motivo .. 
-            if(listado[0][index]['fila'] == 1 && cab[x] != 'repuesto' && cab[x] != 'motivo' && cab[x] != 'reparacion' && cab[x] != 'fila' && cab[x] != 'fila2' && cab[x] != 'id' && cab[x] != 'estado2' && cab[x] != 'idDet' && cab[x] != 'piezaCausal' && cab[x] != 'incidente' ){
+            if(listado[0][index]['fila'] == 1 && cab[x] != 'repuesto' && cab[x] != 'motivo' && cab[x] != 'reparacion' && cab[x] != 'fila' && cab[x] != 'fila2' && cab[x] != 'id' && cab[x] != 'estado2' && cab[x] != 'idDet' && cab[x] != 'piezaCausal' && cab[x] != 'incidente'  && cab[x] != 'codigoRep'  && cab[x] != 'nombreRep' && cab[x] != 'codigoRemision'){
               if(cab[x] == 'estado'){
                 if(listado[0][index][ cab[x] ] == 'APROBADO'){
                   body += '<td style="vertical-align:middle"><span class="badge badge-success w-100">' + listado[0][index][ cab[x] ] + '</span></td>'; 
@@ -321,7 +333,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
         head += '<th style="background-color:#dc3545; text-align:center; padding-left:2px; border-right: 1px solid white;">LOG</th>'; //PARA VER EL LOG 
         for (let index = 0; index < cab.length; index++) {
           //repuesto y motivo son del detalle 
-          if(cab[index] != 'repuesto' && cab[index] != 'motivo' && cab[index] != 'reparacion' && cab[index] != 'fila' && cab[index] != 'fila2' && cab[index] != 'id' && cab[index] != 'estado2' && cab[index] != 'idDet'  && cab[index] != 'piezaCausal' && cab[index] != 'incidente' ){
+          if(cab[index] != 'repuesto' && cab[index] != 'motivo' && cab[index] != 'reparacion' && cab[index] != 'fila' && cab[index] != 'fila2' && cab[index] != 'id' && cab[index] != 'estado2' && cab[index] != 'idDet'  && cab[index] != 'piezaCausal' && cab[index] != 'incidente'  && cab[index] != 'codigoRep'  && cab[index] != 'nombreRep'  && cab[index] != 'codigoRemision'){
             head += '<th style="background-color:#dc3545; padding-top:auto;paddgin-bottom:auto; border-right: 1px solid white;" id="'+ cab[index] +'">' + cab[index].toUpperCase() + '</th>'; 
           }
         }
@@ -480,7 +492,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
               ){ button.disabled = true; } 
             document.getElementById('boxRep'+ orden ).prepend( button ); //se agrega el boton a la linea... 
             document.getElementById('BREN'+ orden ).addEventListener('click',()=>{ //se agrega el evento ... 
-              this.aprobar( 'REPUESTO', listado[0][index]['id'] , 'ENTREGADO', listado[0][index]['usuario'], orden );
+              this.aprobar( 'REPUESTO', listado[0][index]['id'] , 'ENTREGADO', listado[0][index]['usuario'], listado[0][index]['ot'] );
             }); 
   
             /*en espera*/
@@ -618,8 +630,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
     });  
   }
 
-  aprobar(area , solicitud , estado , operario , ot ){
 
+  subAprobar(area, solicitud, estado, operario, ot ){
     //datos base para la aprobacion... 
     var datos = [], usuario = ""; 
     usuario = localStorage.getItem('user');
@@ -685,7 +697,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
         return; 
       } 
     }else{
-      /* CONTROL ANTERIOR LOS ITEN RECHAZADO NO PUEDEN MODIFICARSE MAS... 
+
+           /* CONTROL ANTERIOR LOS ITEN RECHAZADO NO PUEDEN MODIFICARSE MAS... 
       //para aprobar todos los estados tienen que estar nuevo.. 
       if($("#TD"+solicitud+" tbody tr:contains(RECHAZADO)").length > 0 ){ 
         alert('No puede aprobar si un item del detalle esta rechazado !! ') ;
@@ -693,9 +706,11 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
       }
       */
       datos.push({name: 'motivo' , value: '' }); 
+
     }
+  
     console.log(datos);
-    var url;
+    let url = ''
     var servidor = window.location.origin;    
     if (servidor.indexOf('localhost') >0 ){
       url = "http://192.168.10.54:3010/garantia-aprobacion";
@@ -737,8 +752,212 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
           area: area 
       });
 
-    });
+    });    
+  }
+
+  async aprobar(area , solicitud , estado , operario , ot ){
+
+    localStorage.setItem('repuestoOK','0')
+    if(area == 'REPUESTO' && estado == 'ENTREGADO'){
+      //controlamos si existen remision para repuesto 
+      // Solicitud GET (Request).
+      var url='', control=0;
+      let remision = '' , detalle = ''
+      var servidor = window.location.origin;
+      if (servidor.indexOf('localhost') >0 ){
+        url = "http://192.168.10.54:3010/garantia-repuesto";
+      }else{
+        url = servidor + "/garantia-repuesto";
+      }        
+      await fetch(url + '/' + ot)
+        // Exito
+        .then(response => response.json())  // convertir a json
+        .then(json => {
+          console.log('datos de la remision .... ',json)
+          if( json.remision.length == 0 ){
+            swal.fire('No tiene Remision la orden, favor primero haga la remision para aprobar la solicitud !!!')
+            control = 1 
+          }else{
+            localStorage.setItem('lista-remision', JSON.stringify(json.remision))
+            localStorage.setItem('lista-detalle', JSON.stringify(json.detalle))
+            json.remision.forEach((item,x)=>{
+              remision+= `<tr>
+                            <td draggable="true" id="remision-${x}" style="cursor: pointer" data-codigo="${item.CODIGO}" data-name="${item.ARTICULO}" data-remision="${item.REMISION}"> 
+                            <i class="fa fa-chevron-circle-left" aria-hidden="true"></i> ${item.CODIGO}</td>
+                            <td>${item.ARTICULO}</td>
+                            <td>${item.CANTIDAD}</td>
+                            <td>${item.fecha +' '+ item.hora}</td>
+                            <td>${item.REMISION}</td>
+                          </tr>`
+            })
+          
+            json.detalle.forEach(item=>{
+              detalle+= `<tr id="det-${item.id}">
+                            <td>${item.id}</td>
+                            <td>${item.incidente}</td>
+                            <td>${item.repuesto}</td>
+                            <td><input type="text" id="detalle-${item.id}" data-codigo="" data-name="" data-remision=""/></td>
+                          </tr>`
+            })
+
+          }
+          console.log(json)             
+        })    //imprimir los datos en la consola
+        .catch(err => console.log('Solicitud fallida', err)); // Capturar errores   
+        
+        if(control === 1){
+          return;
+        }else{
+          var myhtml = 
+          `
+          <H2>NRO DE OT ${ot} </H2>
+          <div class="d-flex justify-content-center">
+            <div class="table-responsive table-bordered p-0" style="height:400px; border: 10px solid white; border-radius:30px;">
+              <h4>Detalle Solicitud Garantia</h4>
+              <table class="table table-sm table-head-fixed text-nowrap m-0 table-hover table-striped">
+                <thead >
+                  <th style="background-color: #dc3545; color:white;">ID</th>
+                  <th style="background-color: #dc3545; color:white;">INCIDENTE</th>
+                  <th style="background-color: #dc3545; color:white;">REPUESTO</th>
+                  <th style="background-color: #dc3545; color:white;">CODIGO REP</th>
+                </thead>
+                <tbody style="font-size:14px;" id="detalleRemision">
+                  ${detalle} 
+                </tbody>
+    
+              </table>
+            </div>'             
+
+            <div class="table-responsive table-bordered p-0" style="height:400px; border: 10px solid white; border-radius:30px;">
+              <h4>Remision de la OT Garantia</h4>
+              <table class="table table-sm table-head-fixed text-nowrap m-0 table-hover table-striped">
+                <thead >
+                  <th style="background-color: #dc3545; color:white;">CODIGO</th>
+                  <th style="background-color: #dc3545; color:white;">ARTICULO</th>
+                  <th style="background-color: #dc3545; color:white;">CANTIDAD</th>
+                  <th style="background-color: #dc3545; color:white;">FECHA</th>
+                  <th style="background-color: #dc3545; color:white;">REMISION</th>
+                </thead>
+                <tbody style="font-size:14px;">
+                  ${remision}
+                </tbody >
+    
+              </table>
+            </div>'             
+          </div>
+          <div class="flex justify-content-end">
+            <button type="button" id="bActualizarRemision" class="btn btn-sm btn-info mt-4">Actualizar listado piezas</button>
+          </div>
+      `
+         swal.fire({
+            showCloseButton: true,
+            showConfirmButton: false,
+            html: myhtml, 
+            width: '100%'
+          }).then(x=>{
+
+            if(localStorage.getItem('repuestoOK') === '1'){
+              this.subAprobar(area, solicitud, estado, operario, ot ) 
+            }
+
+          }) 
+
+          //para copiar los datos de la remision a la lista facilmente 
+          const remisionList = JSON.parse(localStorage.getItem('lista-remision'))
+          const detalleList = JSON.parse(localStorage.getItem('lista-detalle'))
+          let dragged = null
+
+          remisionList.forEach((item,x)=>{
+            $("#remision-" + x).on("dragstart", (event) => {
+              dragged = event.target;
+            })
+          })
+
+          detalleList.forEach((item,x)=>{
+            $("#detalle-" + item.id).on("dragover", (event) => { event.preventDefault() })
+            $("#detalle-" + item.id).on("drop", (event) => {
+              event.target.value = dragged.dataset.codigo
+              event.target.dataset.codigo = dragged.dataset.codigo
+              event.target.dataset.name = dragged.dataset.name
+              event.target.dataset.remision = dragged.dataset.remision
+            })
+          })
+
+          $( "#bActualizarRemision" ).on( "click", function() {
+            var detalle = [];
+            var tbl = $("#detalleRemision tr") , celda: any;
+            console.log(tbl)
+            const listaRemision = JSON.parse(localStorage.getItem('lista-remision'))
+            const list = []
+            for (let index = 0; index < tbl.length; index++) {
+              celda = tbl[index].getElementsByTagName('td');
+              console.log(celda)
+
+              list.push({id: celda[0].innerHTML, codigo: celda[3].children[0].value, nombre: celda[3].children[0].dataset.name , remision: celda[3].children[0].dataset.remision })
+            }
+
+            if(list.every(item=> listaRemision.map(item=> item.CODIGO).includes(item.codigo)) === false ){
+              console.log(list)
+              list.forEach(item=>{
+                console.log(listaRemision.map(item=> item.CODIGO).includes(item.codigo), item.id)
+                if(listaRemision.map(item=> item.CODIGO).includes(item.codigo)=== false){
+                  $("#det-"+item.id).css({'background-color':'red','color':'white'})
+                }else{
+                  $("#det-"+item.id).css({'background-color':'','color':''})
+                }
+              })
+              alert('No ingreso todos los item en el listado de solicitud!!!')
+            }else{
+              list.forEach(item=> $("#det-"+item.id).css({'background-color':'','color':''}))
+
+              var servidor = window.location.origin;    
+              if (servidor.indexOf('localhost') >0 ){
+                url = "http://192.168.10.54:3010/garantia-upd-det-rep"
+              }else{
+                url = servidor + "/garantia-upd-det-rep";
+              }
+              fetch(url, {
+                method: "POST",
+                body: JSON.stringify(list),
+                headers: {"Content-type": "application/json; charset=UTF-8"}
+              })
+              .then(response => {
+                response.json()
+                if(response.ok){
+                  alert('Datos Guardados correctamente!! ') 
+                  localStorage.setItem('repuestoOK', '1')
+                  swal.close()
+                }
+              }) 
+              .then(json => console.log(json))
+              .catch(err => {console.log(err)
+                alert('Hubo un error al grabar los datos')
+                return 
+              })
+
+            }
+          });
+          
+        }
+
+        /*
+          update solicitudGar
+          set area = 'GARANTIA'
+          ,estado = 'APROBADO'
+          where id = 186
+
+          select * 
+          from solicitudGar
+          where id = 186
+        */
+      //return
+      return
+
+    }
+
+    this.subAprobar(area, solicitud, estado, operario, ot )
 
   }
+
 
 }
