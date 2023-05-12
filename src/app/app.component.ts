@@ -74,8 +74,9 @@ export class AppComponent implements OnInit {
       if(String( localStorage.getItem('area')).toUpperCase() == 'JEFE GRUPO' ){
         $(".admin").css('display', 'none');
       }
-      if(String( localStorage.getItem('area')).toUpperCase() == 'REPUESTO' || String( localStorage.getItem('area')).toUpperCase() == 'GARANTIA' ){
-        $(".crear-solicitud").css('display', 'none');
+      if(String( localStorage.getItem('area')).toUpperCase() == 'REPUESTO' ){
+        //if(String( localStorage.getItem('area')).toUpperCase() == 'REPUESTO' || String( localStorage.getItem('area')).toUpperCase() == 'GARANTIA' ){
+          $(".crear-solicitud").css('display', 'none');
       }
       if(String( localStorage.getItem('area')).toUpperCase() !== 'ADMINISTRADOR' ){
         $(".user").css('display', 'none');

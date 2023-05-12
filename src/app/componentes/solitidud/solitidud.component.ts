@@ -61,6 +61,7 @@ ngOnDestroy(){
 
     let ot = this.route.snapshot.paramMap.get('id');
     if (Number(ot) != 0) {
+      $("#bSolicitar").text("Actualizar")
       //this.notificacion.getToken();// trae el token que genero el usuario... 
       //this.notificacion.sendPush('Garantia', 'Nueva Solicitud de ' + String(ot) );
       //las notificaciones se van a enviar desde el servidor 
@@ -139,12 +140,13 @@ ngOnDestroy(){
               console.log(datos)
               var body = "";
               localStorage.setItem("detalle-solicitud", JSON.stringify(datos))
+              
               for (let index = 0; index < datos.length; index++) {
                 body += '<tr nuevo="no" id="det-'+datos[index]['idDet']+'">';
-                body += '<td>' + datos[index]['fila'] + '</td>' +
+                body += '<td>' + datos[index]['fila'] + (datos[index]['estado'] === 'PENDIENTE' && datos[index]['area'] === 'TALLER' ? '<button type="button" class="btn btn-success btn-sm mb-0 mt-0 ml-1" id="bMotivo-'+ datos[index]['fila'] +'"> <i class="fa fa-edit" aria-hidden="true"></i> </button>' : ''  ) + '</td>' +
                   '<td>' + datos[index]['incidente'] + '</td>' +
                   '<td>' + datos[index]['repuesto'] + '</td>' +
-                  '<td>' + datos[index]['motivo'] + '</td>' +
+                  '<td>' + datos[index]['motivo']   + '</td>' +
                   '<td>' + datos[index]['reparacion'] + '</td>'+
                   '<td>' + (datos[index]['piezaCausal'] ?? '') + '</td>';
                 if (datos[index]['estado2'] == 'APROBADO' || datos[index]['estado2'] == 'ENTREGADO') {
@@ -165,6 +167,7 @@ ngOnDestroy(){
                 //'<td><span class="badge badge-info">'+ datos[index]['estado']   +'</span></td>'+
                 body += '<td></td>'; //columna de los botones... 
                 body += '</tr>';
+
               }
               $("#fecha").val(datos[0]['FSolicitud']);//se recupera de la primera fila .. 
               $("#vdn").val(datos[0]['vdn']);//se recupera de la primera fila .. 
@@ -173,12 +176,43 @@ ngOnDestroy(){
               $("#estado").val(datos[0]['estado']);//se recupera de la primera fila .
               $("#id").val(datos[0]['id']);//se recupera de la primera fila .
               $("#mecanico").val(datos[0]['mecanico']);//se recupera de la primera fila .
-              $("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
+              $("#jefeGrupo").val(datos[0]['nombreJefeGrupo']);//se recupera de la primera fila .
+              //$("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
 
               $("#vdn").attr('readonly', true);
               $("#tipoGarantia").attr("disabled", true); 
               $("#mecanico").attr("disabled", true); 
               document.querySelector('#piezasSolicitadas').innerHTML = body;
+
+              for (let index = 0; index < datos.length; index++) {
+                if(datos[index]['estado'] === 'PENDIENTE' && datos[index]['area'] === 'TALLER'){
+  
+                  document.getElementById('bMotivo-'+datos[index]['fila']).addEventListener('click', async(x) => {
+                    //alert(datos[index]['idDet'])
+
+                    let res = prompt('Ingrese el nuevo diagnostico de la pieza '+datos[index]['repuesto']+' por favor:')
+                    if(res){
+
+                      fetch('http://192.168.10.54:3010/garantia-upd-det-motivo/' + datos[index]['idDet'], {
+                        method: "POST",
+                        body: JSON.stringify({motivo: res.toUpperCase()}),
+                        headers: {"Content-type": "application/json; charset=UTF-8"}
+                      })
+                      .then(json => {
+                        alert('Datos modificados correctamente !!!')
+                        window.location.reload()
+                      })
+                      .catch(err => {console.log(err)
+                        alert('hubo un error en la actualizacion !!')
+                      })
+
+                    }
+                  })
+                }
+              }
+
+
+
               datos.forEach(item=>{
                 document.getElementById('det-'+item.idDet).addEventListener('dblclick', async(x) => {
                   if($("#estado").val() == 'RECHAZADO'){
@@ -218,6 +252,7 @@ ngOnDestroy(){
                 $("#estado").attr('class', 'form-control bg-warning');
               }else if ($("#estado").val() == 'NUEVO' ){
                 $("#estado").attr('class', 'form-control bg-info');
+
               }else if ($("#estado").val() == 'APROBADO' || $("#estado").val() == 'ENTREGADO'){
                 $("#estado").attr('class', 'form-control bg-success');
               }else if ($("#estado").val() == 'RECHAZADO' ){
@@ -245,6 +280,14 @@ ngOnDestroy(){
 
             }
           })
+          .then(x=>{
+            if($("#estado").val() !=="NUEVO"){
+              $("#bSolicitar").text("Actualizar")
+            }else{
+              $("#bSolicitar").text("Solicitar")
+
+            }
+          })
 
 
         })
@@ -252,8 +295,8 @@ ngOnDestroy(){
           //this.spinner(0); 
           console.error('hubo un error al traer los datos.. ');
         });
-    }
 
+    }
   }
 
 
@@ -334,13 +377,47 @@ ngOnDestroy(){
 
   }
 
+  async listo(){
+      var valor = {id: $('#id').val(), estado: 'PENDIENTE', area: 'GARANTIA'} 
+      var url; var servidor = window.location.origin;
+      if (servidor.indexOf('localhost') > 0 ){
+        url = "http://192.168.10.54:3010/garantia-upd-cab";
+      }else{
+        url = servidor + "/garantia-upd-cab";
+      }
+      await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(valor),
+        headers: {"Content-type": "application/json; charset=UTF-8"}
+      })
+      //.then(response => response.json()) 
+      .then( async( json) => {
+        alert('Datos actualizados !!!')
+
+        this.websocket.emit('solicitud', { mensaje: 'El '+ localStorage.getItem('area') +' '+ localStorage.getItem('nombre') +' ha modificado una solicitud OT Nro ' + $("#ot").val() + ' !!!', para: localStorage.getItem('user'), area: $("#area").val() });
+        this.websocket.emit('refrescar-pendientes', {msg: 'ok'})
+        url = "http://192.168.10.54:3010/telegram-send";
+        await fetch(url +`?chat_id=${-916962805}&mensaje=${localStorage.getItem('nombre')} ha modificado solicitud nro OT ${$("#ot").val()} \n http://192.168.10.54:3010/garantia/Solicitud/${$("#ot").val()} `)
+          .then(response => response.json())  // convertir a json
+          .then(json => console.log('se envio telegram....'))
+          .then(json =>{
+            this.recuperarSolicitud()
+          })
+          .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
+          
+        //this.recuperarSolicitud()
+      })
+      .catch(err => console.log(err))
+  }
+
   async solicitar() {
 
     //si alguien habilitado 
     if ($("#estado").val() == 'PENDIENTE') {
       //debe agregar almenos un registro para insertar ... 
       if( $("#piezasSolicitadas tr[nuevo=si]").length==0 ){
-        swal.fire('Debe agregar un registro en el detalle !!!','', 'warning');
+        this.listo()
+        //swal.fire('Debe agregar un registro en el detalle !!!','', 'warning');
         return ;
       }
       var valor = [];

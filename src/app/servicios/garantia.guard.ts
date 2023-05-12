@@ -11,7 +11,7 @@ export class GarantiaGuard implements CanActivate {
     route: ActivatedRouteSnapshot, 
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
 
-      if(localStorage.getItem('area') !== 'JEFE GRUPO' && localStorage.getItem('area') !== 'ADMINISTRADOR'){
+      if(localStorage.getItem('area') !== 'JEFE GRUPO' && localStorage.getItem('area') !== 'ADMINISTRADOR' && localStorage.getItem('area') !== 'GARANTIA' ){
         this.router.navigate(['garantia/Pendientes']);
         //return false;
       }

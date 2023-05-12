@@ -141,6 +141,10 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
       })
       .done((rs)=>{
         this.spinner(0); 
+        //ordernar los resultados... pendiente rechazado y aprobado
+        rs['rows'] = rs['rows']
+        .map(item =>{ return( {...item, orderEstado:({'PENDIENTE':1 , 'RECHAZADO':2 , 'APROBADO':3})[item.estado] } )})
+        .sort((a,b)=> a.orderEstado - b.orderEstado || a.area.localeCompare(b.area) || b.FSolicitud - a.FSolicitud )
         console.log(rs['rows']);
         if(rs['rows'].length == 0 ){
           swal.fire('No existen registros !!', '', 'warning');
@@ -183,6 +187,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                   '<th class="border border-white">Remision CodRepuesto</th>'+ 
                   '<th class="border border-white">Remision Repuesto</th>'+ 
                   '<th class="border border-white">Remision Nro</th>'+ 
+                  '<th class="border border-white">Fecha Nro</th>'+ 
+                  '<th class="border border-white">Emisor Nro</th>'+ 
                 '</tr>'+ 
                 //detalle 
                 '<tr>'+ 
@@ -208,6 +214,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                   '<td>'+ listado[0][index]['codigoRep'] +'</td>'+
                   '<td>'+ listado[0][index]['nombreRep'] +'</td>'+
                   '<td>'+ listado[0][index]['codigoRemision'] +'</td>'+
+                  '<td>'+ listado[0][index]['fecha'] +'</td>'+
+                  '<td>'+ listado[0][index]['emisor'] +'</td>'+
                 '</tr>';
     
           }else { //si no es fila uno 
@@ -235,6 +243,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                           '<td>'+ listado[0][index]['codigoRep'] +'</td>'+
                           '<td>'+ listado[0][index]['nombreRep'] +'</td>'+
                           '<td>'+ listado[0][index]['codigoRemision'] +
+                          '<td>'+ listado[0][index]['fecha'] +'</td>'+
+                          '<td>'+ listado[0][index]['emisor'] +'</td>'+
                           '</td>'+
 
         
@@ -273,7 +283,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
   
           for(let x = 0; x < cab.length; x++){ 
             //solo fila 1 carga y que no sean del detalle repuesto y motivo .. 
-            if(listado[0][index]['fila'] == 1 && cab[x] != 'repuesto' && cab[x] != 'motivo' && cab[x] != 'reparacion' && cab[x] != 'fila' && cab[x] != 'fila2' && cab[x] != 'id' && cab[x] != 'estado2' && cab[x] != 'idDet' && cab[x] != 'piezaCausal' && cab[x] != 'incidente'  && cab[x] != 'codigoRep'  && cab[x] != 'nombreRep' && cab[x] != 'codigoRemision'){
+            if(listado[0][index]['fila'] == 1 && cab[x] != 'repuesto' && cab[x] != 'motivo' && cab[x] != 'reparacion' && cab[x] != 'fila' && cab[x] != 'fila2' && cab[x] != 'id' && cab[x] != 'estado2' && cab[x] != 'idDet' && cab[x] != 'piezaCausal' && cab[x] != 'incidente'  && cab[x] != 'codigoRep'  && cab[x] != 'nombreRep' && cab[x] != 'codigoRemision' && cab[x] != 'fecha' && cab[x] != 'emisor'){
               if(cab[x] == 'estado'){
                 if(listado[0][index][ cab[x] ] == 'APROBADO'){
                   body += '<td style="vertical-align:middle"><span class="badge badge-success w-100">' + listado[0][index][ cab[x] ] + '</span></td>'; 
@@ -333,7 +343,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
         head += '<th style="background-color:#dc3545; text-align:center; padding-left:2px; border-right: 1px solid white;">LOG</th>'; //PARA VER EL LOG 
         for (let index = 0; index < cab.length; index++) {
           //repuesto y motivo son del detalle 
-          if(cab[index] != 'repuesto' && cab[index] != 'motivo' && cab[index] != 'reparacion' && cab[index] != 'fila' && cab[index] != 'fila2' && cab[index] != 'id' && cab[index] != 'estado2' && cab[index] != 'idDet'  && cab[index] != 'piezaCausal' && cab[index] != 'incidente'  && cab[index] != 'codigoRep'  && cab[index] != 'nombreRep'  && cab[index] != 'codigoRemision'){
+          if(cab[index] != 'repuesto' && cab[index] != 'motivo' && cab[index] != 'reparacion' && cab[index] != 'fila' && cab[index] != 'fila2' && cab[index] != 'id' && cab[index] != 'estado2' && cab[index] != 'idDet'  && cab[index] != 'piezaCausal' && cab[index] != 'incidente'  && cab[index] != 'codigoRep'  && cab[index] != 'nombreRep'  && cab[index] != 'codigoRemision'  && cab[index] != 'fecha' && cab[index] != 'emisor'){
             head += '<th style="background-color:#dc3545; padding-top:auto;paddgin-bottom:auto; border-right: 1px solid white;" id="'+ cab[index] +'">' + cab[index].toUpperCase() + '</th>'; 
           }
         }
@@ -630,16 +640,20 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
     });  
   }
 
-
-  subAprobar(area, solicitud, estado, operario, ot ){
+async  subAprobar(area, solicitud, estado, operario, ot ){
     //datos base para la aprobacion... 
     var datos = [], usuario = ""; 
     usuario = localStorage.getItem('user');
+
+    if(area === 'GARANTIA' && estado === 'PENDIENTE'){
+      area = 'TALLER'
+    }
+
     datos.push( 
       {name: 'id', value: solicitud }, 
       {name: 'usuario', value: usuario }, 
-      {name: 'area', value: area }, 
-      {name: 'estado', value: estado }, 
+      {name: 'area', value: (area === 'TALLER' && estado === 'MODIFICADO'? 'GARANTIA' : area ) }, 
+      {name: 'estado', value: (area === 'TALLER' && estado === 'MODIFICADO'? 'PENDIENTE' : estado ) }, 
     );
 
       //si se modifico el detalle se agrega aqui... 
@@ -655,11 +669,13 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
 
       //si se rechaza tiene otro tratamiento... 
     if(estado == 'RECHAZADO'){
+      /*
       //tiene que tener marcado algun detalle para el rechazo 
       if($("#TD"+solicitud+" tbody tr:contains(RECHAZADO) td:nth-child(2)[valor!='RECHAZADO']").length == 0 ){ 
         alert('No ha indicado que fila del detalle es rechazado favor haga click sobre el estado !! ') ;
         return ;
       }
+      */
       //si es rechazado debe ingresar un motivo por el rechazo
       var motivo = prompt("INGRESE MOTIVO RECHAZO !!!" );
       if(motivo == null ) return ;
@@ -670,10 +686,11 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
       datos.push({name: 'motivo' , value: motivo });
 
     }else if(estado == 'ESPERA'){
+      /*
       if($("#TD"+solicitud+" tbody tr:contains(ESPERA)").length == 0 ){ 
         alert('No ha indicado que fila del detalle esta en Espera !! ') ;
         return ;
-      }
+      }*/
       //si es rechazado debe ingresar un motivo por el rechazo
       var motivo = prompt("INGRESE MOTIVO de ESPERA !!!" );
       if(motivo == null ) return ;
@@ -736,7 +753,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
     .then((value)=>{
       this.buscar(0);
     })
-    .then((value)=>{
+    .then(async(value)=>{
       console.log('aprobacion datos... ');
       console.log(area , solicitud , estado );
       if(estado == 'APROBADO'){
@@ -751,6 +768,20 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
           para: operario,
           area: area 
       });
+      if(area === 'REPUESTO' || area === 'GARANTIA'){
+        await fetch("http://192.168.10.54:3010/garantia-chatId/" + operario )
+        .then(response => response.json())  // convertir a json
+        .then(async(json) => {
+          const chatId = json[0].chat_id;
+          url = "http://192.168.10.54:3010/telegram-send";
+          await fetch(url +`?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${ot}` )
+            .then(response => response.json())  // convertir a json
+            .then(json => console.log('se envio telegram....'))
+            .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
+        })
+        .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
+      }
+     
 
     });    
   }
@@ -782,12 +813,18 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
             localStorage.setItem('lista-detalle', JSON.stringify(json.detalle))
             json.remision.forEach((item,x)=>{
               remision+= `<tr>
-                            <td draggable="true" id="remision-${x}" style="cursor: pointer" data-codigo="${item.CODIGO}" data-name="${item.ARTICULO}" data-remision="${item.REMISION}"> 
-                            <i class="fa fa-chevron-circle-left" aria-hidden="true"></i> ${item.CODIGO}</td>
+                            <td draggable="true" id="remision-${x}" style="cursor: pointer" 
+                              data-codigo="${item.CODIGO}" 
+                              data-name="${item.ARTICULO}" 
+                              data-remision="${item.REMISION}" 
+                              data-emisor="${item.userCreate}"  
+                              data-fecha="${item.fecha +' '+ item.hora}"> 
+                              <i class="fa fa-chevron-circle-left" aria-hidden="true"></i> ${item.CODIGO}</td>
                             <td>${item.ARTICULO}</td>
                             <td>${item.CANTIDAD}</td>
                             <td>${item.fecha +' '+ item.hora}</td>
                             <td>${item.REMISION}</td>
+                            <td>${item.userCreate}</td>
                           </tr>`
             })
           
@@ -796,7 +833,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                             <td>${item.id}</td>
                             <td>${item.incidente}</td>
                             <td>${item.repuesto}</td>
-                            <td><input type="text" id="detalle-${item.id}" data-codigo="" data-name="" data-remision=""/></td>
+                            <td><input type="text" id="detalle-${item.id}" data-codigo="" data-name="" data-remision="" data-emisor="" data-fecha="" readonly/></td>
                           </tr>`
             })
 
@@ -837,6 +874,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                   <th style="background-color: #dc3545; color:white;">CANTIDAD</th>
                   <th style="background-color: #dc3545; color:white;">FECHA</th>
                   <th style="background-color: #dc3545; color:white;">REMISION</th>
+                  <th style="background-color: #dc3545; color:white;">EMISOR</th>
                 </thead>
                 <tbody style="font-size:14px;">
                   ${remision}
@@ -880,6 +918,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
               event.target.dataset.codigo = dragged.dataset.codigo
               event.target.dataset.name = dragged.dataset.name
               event.target.dataset.remision = dragged.dataset.remision
+              event.target.dataset.emisor = dragged.dataset.emisor
+              event.target.dataset.fecha = dragged.dataset.fecha
             })
           })
 
@@ -893,11 +933,20 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
               celda = tbl[index].getElementsByTagName('td');
               console.log(celda)
 
-              list.push({id: celda[0].innerHTML, codigo: celda[3].children[0].value, nombre: celda[3].children[0].dataset.name , remision: celda[3].children[0].dataset.remision })
+              list.push({
+                id: celda[0].innerHTML, 
+                codigo: celda[3].children[0].value, 
+                nombre: celda[3].children[0].dataset.name , 
+                remision: celda[3].children[0].dataset.remision, 
+                emisor: celda[3].children[0].dataset.emisor,
+                fecha: celda[3].children[0].dataset.fecha,
+              })
             }
 
-            if(list.every(item=> listaRemision.map(item=> item.CODIGO).includes(item.codigo)) === false ){
-              console.log(list)
+            /*
+            if(1 == 2  ){
+            //if(list.every(item=> listaRemision.map(item=> item.CODIGO).includes(item.codigo)) === false ){
+                console.log(list)
               list.forEach(item=>{
                 console.log(listaRemision.map(item=> item.CODIGO).includes(item.codigo), item.id)
                 if(listaRemision.map(item=> item.CODIGO).includes(item.codigo)=== false){
@@ -908,6 +957,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
               })
               alert('No ingreso todos los item en el listado de solicitud!!!')
             }else{
+              */
               list.forEach(item=> $("#det-"+item.id).css({'background-color':'','color':''}))
 
               var servidor = window.location.origin;    
@@ -916,6 +966,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
               }else{
                 url = servidor + "/garantia-upd-det-rep";
               }
+              console.log(list)
               fetch(url, {
                 method: "POST",
                 body: JSON.stringify(list),
@@ -935,22 +986,11 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                 return 
               })
 
-            }
+            //}
           });
           
         }
 
-        /*
-          update solicitudGar
-          set area = 'GARANTIA'
-          ,estado = 'APROBADO'
-          where id = 186
-
-          select * 
-          from solicitudGar
-          where id = 186
-        */
-      //return
       return
 
     }
