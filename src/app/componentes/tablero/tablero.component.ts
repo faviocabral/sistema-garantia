@@ -281,7 +281,8 @@ ngOnDestroy(){
             //swal.fire('No existen registros !!', '', 'warning');
             resolve(0);
           }else{
-            swal.fire('La orden Nro '+ ot +' ya tiene Solicitud creada por '+ rs['rows'][0]['usuario'] +' !!', '', 'warning');
+            resolve(0)
+            //swal.fire('La orden Nro '+ ot +' ya tiene Solicitud creada por '+ rs['rows'][0]['usuario'] +' !!', '', 'warning');
             //reject(1);
           }
         }
