@@ -139,11 +139,11 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
       $.get(url, function(data, status){
         console.log('estado de la consulta ', status );
       })
-      .done((rs)=>{
+      .done((rs)=>{ 
         this.spinner(0); 
         //ordernar los resultados... pendiente rechazado y aprobado
         rs['rows'] = rs['rows']
-        .map(item =>{ return( {...item, orderEstado:({'PENDIENTE':1 , 'RECHAZADO':2 , 'APROBADO':3})[item.estado] } )})
+        .map(item =>{ return( {...item, orderEstado:({'PENDIENTE':1 , 'ENTREGADO':2 , 'APROBADO':3, 'CERRADO':4, 'RECHAZADO':5})[item.estado] } )})
         .sort((a,b)=> a.orderEstado - b.orderEstado || a.area.localeCompare(b.area) || b.FSolicitud - a.FSolicitud )
         console.log(rs['rows']);
         if(rs['rows'].length == 0 ){
@@ -179,16 +179,12 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                 '<tr class="bg-info">'+ 
                   '<th class="border border-white" style="width:10px;">Item</th>'+ 
                   '<th class="border border-white" style="width:50px;">Estado</th>'+ 
+                  '<th class="border border-white" style="width:50px;">Cantidad</th>'+ 
                   '<th class="border border-white">Incidente</th>'+ 
                   '<th class="border border-white">Pieza Causal</th>'+ 
                   '<th class="border border-white">Repuesto</th>'+ 
                   '<th class="border border-white">Motivo</th>'+ 
                   '<th class="border border-white">Reparacion</th>'+ 
-                  '<th class="border border-white">Remision CodRepuesto</th>'+ 
-                  '<th class="border border-white">Remision Repuesto</th>'+ 
-                  '<th class="border border-white">Remision Nro</th>'+ 
-                  '<th class="border border-white">Fecha Nro</th>'+ 
-                  '<th class="border border-white">Emisor Nro</th>'+ 
                 '</tr>'+ 
                 //detalle 
                 '<tr>'+ 
@@ -206,16 +202,12 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                   }else{
                     subTable += '<td id="D'+ listado[0][index]['id'] + listado[0][index]['fila'] +'" valor="'+ listado[0][index]['estado2'] +'" idDet="'+ listado[0][index]['idDet'] +'"><span class="badge badge-info">'+ listado[0][index]['estado2'] +'</span></td>';
                   }
-                  subTable +='<td>'+ (listado[0][index]['incidente'] ?? '') +'</td>'+
+                  subTable +='<td>'+ (listado[0][index]['cantidad'] ?? '') +'</td>'+
+                  '<td>'+ (listado[0][index]['incidente'] ?? '') +'</td>'+
                   '<td>'+ (listado[0][index]['piezaCausal'] ?? '-') +'</td>'+
                   '<td>'+ listado[0][index]['repuesto'] +'</td>'+
                   '<td>'+ listado[0][index]['motivo'] +'</td>'+
                   '<td>'+ listado[0][index]['reparacion'] +'</td>'+
-                  '<td>'+ listado[0][index]['codigoRep'] +'</td>'+
-                  '<td>'+ listado[0][index]['nombreRep'] +'</td>'+
-                  '<td>'+ listado[0][index]['codigoRemision'] +'</td>'+
-                  '<td>'+ listado[0][index]['fecha'] +'</td>'+
-                  '<td>'+ listado[0][index]['emisor'] +'</td>'+
                 '</tr>';
     
           }else { //si no es fila uno 
@@ -235,16 +227,12 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                           }else{
                             subTable += '<td id="D'+ listado[0][index]['id'] + listado[0][index]['fila'] +'" valor="'+ listado[0][index]['estado2'] +'" idDet="'+ listado[0][index]['idDet'] +'"><span class="badge badge-info">'+ listado[0][index]['estado2'] +'</span></td>';
                           }
-                          subTable +='<td>'+ (listado[0][index]['incidente'] ?? '') +'</td>'+
+                          subTable +='<td>'+ (listado[0][index]['cantidad'] ?? '') +'</td>'+
+                          '<td>'+ (listado[0][index]['incidente'] ?? '') +'</td>'+
                           '<td>'+ (listado[0][index]['piezaCausal'] ?? '-') +'</td>'+
                           '<td>'+ listado[0][index]['repuesto'] +'</td>'+
                           '<td>'+ listado[0][index]['motivo'] +'</td>'+
                           '<td>'+ listado[0][index]['reparacion'] +'</td>'+
-                          '<td>'+ listado[0][index]['codigoRep'] +'</td>'+
-                          '<td>'+ listado[0][index]['nombreRep'] +'</td>'+
-                          '<td>'+ listado[0][index]['codigoRemision'] +
-                          '<td>'+ listado[0][index]['fecha'] +'</td>'+
-                          '<td>'+ listado[0][index]['emisor'] +'</td>'+
                           '</td>'+
 
         
@@ -288,6 +276,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
                 if(listado[0][index][ cab[x] ] == 'APROBADO'){
                   body += '<td style="vertical-align:middle"><span class="badge badge-success w-100">' + listado[0][index][ cab[x] ] + '</span></td>'; 
                 }else if(listado[0][index][ cab[x] ] == 'RECHAZADO'){
+                  body += '<td style="vertical-align:middle"><span class="badge badge-danger w-100">' + listado[0][index][ cab[x] ] + '</span></td>'; 
+                }else if(listado[0][index][ cab[x] ] == 'CERRADO'){
                   body += '<td style="vertical-align:middle"><span class="badge badge-danger w-100">' + listado[0][index][ cab[x] ] + '</span></td>'; 
                 }else if(listado[0][index][ cab[x] ] == 'ESPERA'){
                   body += '<td style="vertical-align:middle"><span class="badge badge-warning w-100">' + listado[0][index][ cab[x] ] + '</span></td>'; 
@@ -774,7 +764,7 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
         .then(async(json) => {
           const chatId = json[0].chat_id;
           url = "http://192.168.10.54:3010/telegram-send";
-          await fetch(url +`?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${ot}` )
+          await fetch(url +`?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${ot} motivo ${motivo}` )
             .then(response => response.json())  // convertir a json
             .then(json => console.log('se envio telegram....'))
             .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
@@ -789,11 +779,12 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
   async aprobar(area , solicitud , estado , operario , ot ){
 
     localStorage.setItem('repuestoOK','0')
+    localStorage.setItem('ot', ot)
     if(area == 'REPUESTO' && estado == 'ENTREGADO'){
       //controlamos si existen remision para repuesto 
       // Solicitud GET (Request).
       var url='', control=0;
-      let remision = '' , detalle = ''
+      let remision = '' , detalle = '' , mecanicos=''
       var servidor = window.location.origin;
       if (servidor.indexOf('localhost') >0 ){
         url = "http://192.168.10.54:3010/garantia-repuesto";
@@ -811,20 +802,29 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
           }else{
             localStorage.setItem('lista-remision', JSON.stringify(json.remision))
             localStorage.setItem('lista-detalle', JSON.stringify(json.detalle))
+            localStorage.setItem('lista-mecanicos', JSON.stringify(json.mecanicos))
+
             json.remision.forEach((item,x)=>{
-              remision+= `<tr>
-                            <td draggable="true" id="remision-${x}" style="cursor: pointer" 
-                              data-codigo="${item.CODIGO}" 
-                              data-name="${item.ARTICULO}" 
-                              data-remision="${item.REMISION}" 
-                              data-emisor="${item.userCreate}"  
-                              data-fecha="${item.fecha +' '+ item.hora}"> 
-                              <i class="fa fa-chevron-circle-left" aria-hidden="true"></i> ${item.CODIGO}</td>
+              if(item.firmado.length > 0 ){
+                remision+= `<tr style="background:#B6D7A8">
+                              <td id="remision-${x}" data-name="${item.ARTICULO}"> ${item.REMISION}</td>`
+              }else{
+                remision+= `<tr>
+                              <td draggable="true" id="remision-${x}" style="cursor: pointer" 
+                                data-codigo="${item.CODIGO}" 
+                                data-name="${item.ARTICULO}" 
+                                data-remision="${item.REMISION}" 
+                                data-emisor="${item.userCreate}" 
+                                data-fecha="${item.fecha +' '+ item.hora}"> 
+                                <i class="fa fa-chevron-circle-left" aria-hidden="true"></i> ${item.REMISION}</td>`
+
+              }
+                remision+= `<td>${item.CODIGO}</td>
                             <td>${item.ARTICULO}</td>
                             <td>${item.CANTIDAD}</td>
                             <td>${item.fecha +' '+ item.hora}</td>
-                            <td>${item.REMISION}</td>
                             <td>${item.userCreate}</td>
+                            <td>${item.firmado ?? ''}</td>
                           </tr>`
             })
           
@@ -837,6 +837,18 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
                           </tr>`
             })
 
+            let listaSort= json.mecanicos.sort((a,b)=> a.nombre.localeCompare(b.nombre) )
+            listaSort.forEach(item=>{
+              mecanicos+= `<tr>
+              <td style="text-align:left;" class="fila-${item.chatid}">${item.nombre}</td>
+              <td class="fila-${item.chatid}">
+                <button type="button" id="reset-${item.chatid}" class="btn btn-danger btn-sm mr-2" style="visibility:hidden;"> <i class="fa fa-trash-alt" aria-hidden="true"></i></button>
+                <button type="button" id="firma-${item.chatid}" class="btn btn-success btn-sm" style="visibility:hidden;"> <i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+              </td>
+              <td id="mecanico-${item.chatid}" style="max-width:120px; font-weight:bold;" class="fila-${item.chatid}"></td>
+              `
+            })
+
           }
           console.log(json)             
         })    //imprimir los datos en la consola
@@ -845,21 +857,22 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
         if(control === 1){
           return;
         }else{
+          localStorage.removeItem('mecanico-chatId')
           var myhtml = 
           `
           <H2>NRO DE OT ${ot} </H2>
           <div class="d-flex justify-content-center">
             <div class="table-responsive table-bordered p-0" style="height:400px; border: 10px solid white; border-radius:30px;">
-              <h4>Detalle Solicitud Garantia</h4>
-              <table class="table table-sm table-head-fixed text-nowrap m-0 table-hover table-striped">
+
+              <h4>Lista Mecanicos</h4>
+              <table class="table table-sm table-head-fixed text-nowrap m-0 table-hover table-striped" id="table-mecanico">
                 <thead >
-                  <th style="background-color: #dc3545; color:white;">ID</th>
-                  <th style="background-color: #dc3545; color:white;">INCIDENTE</th>
-                  <th style="background-color: #dc3545; color:white;">REPUESTO</th>
-                  <th style="background-color: #dc3545; color:white;">CODIGO REP</th>
+                  <th style="background-color: #dc3545; color:white;">MECANICO</th>
+                  <th style="background-color: #dc3545; color:white;">#</th>
+                  <th style="background-color: #dc3545; color:white;">REMISION</th>
                 </thead>
                 <tbody style="font-size:14px;" id="detalleRemision">
-                  ${detalle} 
+                  ${mecanicos} 
                 </tbody>
     
               </table>
@@ -867,14 +880,15 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
 
             <div class="table-responsive table-bordered p-0" style="height:400px; border: 10px solid white; border-radius:30px;">
               <h4>Remision de la OT Garantia</h4>
-              <table class="table table-sm table-head-fixed text-nowrap m-0 table-hover table-striped">
+              <table class="table table-sm table-head-fixed text-nowrap m-0 table-hover table-striped" id="table-remision">
                 <thead >
+                  <th style="background-color: #dc3545; color:white;">REMISION</th>
                   <th style="background-color: #dc3545; color:white;">CODIGO</th>
                   <th style="background-color: #dc3545; color:white;">ARTICULO</th>
                   <th style="background-color: #dc3545; color:white;">CANTIDAD</th>
                   <th style="background-color: #dc3545; color:white;">FECHA</th>
-                  <th style="background-color: #dc3545; color:white;">REMISION</th>
                   <th style="background-color: #dc3545; color:white;">EMISOR</th>
+                  <th style="background-color: #dc3545; color:white;">FIRMADO POR</th>
                 </thead>
                 <tbody style="font-size:14px;">
                   ${remision}
@@ -884,9 +898,11 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
             </div>'             
           </div>
           <div class="flex justify-content-end">
-            <button type="button" id="bActualizarRemision" class="btn btn-sm btn-info mt-4">Actualizar listado piezas</button>
+            <button type="button" id="bVerificarFirma" class="btn btn-sm btn-warning mt-4" style="visibility:hidden;">Verificar Firma</button>
+            <button type="button" id="bActualizarRemision" class="btn btn-sm btn-info mt-4" style="visibility:hidden">Entregar</button>
           </div>
       `
+          
          swal.fire({
             showCloseButton: true,
             showConfirmButton: false,
@@ -900,11 +916,20 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
 
           }) 
 
+
           //para copiar los datos de la remision a la lista facilmente 
           const remisionList = JSON.parse(localStorage.getItem('lista-remision'))
           const detalleList = JSON.parse(localStorage.getItem('lista-detalle'))
-          let dragged = null
+          const mecanicosList = JSON.parse(localStorage.getItem('lista-mecanicos'))
 
+          //habilitar el boton cuando este todo firmado...
+          if(remisionList.findIndex(item=> item.firmado.length === 0) >= 0){
+            //
+          }else{
+            $("#bActualizarRemision").css('visibility', 'visible')
+          }
+
+          let dragged = null
           remisionList.forEach((item,x)=>{
             $("#remision-" + x).on("dragstart", (event) => {
               dragged = event.target;
@@ -923,71 +948,114 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
             })
           })
 
-          $( "#bActualizarRemision" ).on( "click", function() {
-            var detalle = [];
-            var tbl = $("#detalleRemision tr") , celda: any;
-            console.log(tbl)
-            const listaRemision = JSON.parse(localStorage.getItem('lista-remision'))
-            const list = []
-            for (let index = 0; index < tbl.length; index++) {
-              celda = tbl[index].getElementsByTagName('td');
-              console.log(celda)
+          mecanicosList.forEach((item,x)=>{
+            //agregamos css a la fila de la tabla de mecanicos que estamos haciendo hover con drag
+            $("#mecanico-" + item.chatid).on("dragenter", (event) => { 
+              if ($("#mecanico-" + item.chatid).css('background') == 'none') {
+                $("#table-mecanico td").css('background','none')
+                $(".fila-" + item.chatid).css('background', '#B6D7A8')
+              } 
+            })
 
-              list.push({
-                id: celda[0].innerHTML, 
-                codigo: celda[3].children[0].value, 
-                nombre: celda[3].children[0].dataset.name , 
-                remision: celda[3].children[0].dataset.remision, 
-                emisor: celda[3].children[0].dataset.emisor,
-                fecha: celda[3].children[0].dataset.fecha,
-              })
-            }
+            //prevenimos que se ejecute varias veces el evento
+            $("#mecanico-" + item.chatid).on("dragover", (event) => { event.preventDefault() })
+            //con esto recibimos los datos de la otra fuente
+            $("#mecanico-" + item.chatid).on("drop", (event) => {
 
-            /*
-            if(1 == 2  ){
-            //if(list.every(item=> listaRemision.map(item=> item.CODIGO).includes(item.codigo)) === false ){
-                console.log(list)
-              list.forEach(item=>{
-                console.log(listaRemision.map(item=> item.CODIGO).includes(item.codigo), item.id)
-                if(listaRemision.map(item=> item.CODIGO).includes(item.codigo)=== false){
-                  $("#det-"+item.id).css({'background-color':'red','color':'white'})
-                }else{
-                  $("#det-"+item.id).css({'background-color':'','color':''})
-                }
-              })
-              alert('No ingreso todos los item en el listado de solicitud!!!')
-            }else{
-              */
-              list.forEach(item=> $("#det-"+item.id).css({'background-color':'','color':''}))
-
-              var servidor = window.location.origin;    
-              if (servidor.indexOf('localhost') >0 ){
-                url = "http://192.168.10.54:3010/garantia-upd-det-rep"
-              }else{
-                url = servidor + "/garantia-upd-det-rep";
-              }
-              console.log(list)
-              fetch(url, {
-                method: "POST",
-                body: JSON.stringify(list),
-                headers: {"Content-type": "application/json; charset=UTF-8"}
-              })
-              .then(response => {
-                response.json()
-                if(response.ok){
-                  alert('Datos Guardados correctamente!! ') 
-                  localStorage.setItem('repuestoOK', '1')
-                  swal.close()
-                }
-              }) 
-              .then(json => console.log(json))
-              .catch(err => {console.log(err)
-                alert('Hubo un error al grabar los datos')
+              if(localStorage.getItem('mecanico-chatId') === null ){
+                localStorage.setItem('mecanico-chatId',item.chatid)
+              }else if(localStorage.getItem('mecanico-chatId') !== item.chatid){
+                alert('No puede asignar a varios mecanicos...')
                 return 
-              })
+              }
+              let lista = event.target.innerText.split(',')
+              lista = lista.map(item=> item.replace('\n', '')).filter(item=> item.length > 0) // limpiamos la lista de remisiones
+              if(lista.findIndex(item=> item == dragged.dataset.remision)>=0 ){
+                alert('ya existe el item')
+              }else{
+                event.target.style.backgroundColor = '#B6D7A8'
+                event.target.innerHTML += dragged.dataset.remision +',<br>' 
+                //let id = event.target.id.match(/\d/g).join('')
+                $(`#firma-${item.chatid}`).css('visibility', 'visible')
+                $(`#reset-${item.chatid}`).css('visibility', 'visible')
+                console.log(event.target.innerText)
+              }
+            })
 
-            //}
+            //reseteamos toda la fila 
+            $("#reset-" + item.chatid).on("click", (event) => {
+              $(`#firma-${item.chatid}`).css('visibility', 'hidden')
+              $(`#reset-${item.chatid}`).css('visibility', 'hidden')
+              $("#mecanico-" + item.chatid).html('')           
+              $("#table-mecanico td").css('background','none')
+              localStorage.removeItem('mecanico-chatId')
+            })
+
+            //para enviar la firma a telegram
+            $("#firma-" + item.chatid).on("click", async(event) => {
+              let lista = $(`#mecanico-${item.chatid}`).text().split(',')
+              lista = lista.map(item=> item.replace('\n', '')).filter(item=> item.length > 0)
+              let remisiones =[]
+              // filtramos solo las remisiones que fueron asignadas
+              remisiones = remisionList.filter(item=> lista.includes(String(item.REMISION)) )
+              let mensaje = {
+                title:'*Repuesto te ha asignado estas remisiones:*',
+                ot: remisionList.at(0).CallID,
+                remisiones: lista,
+                detalles: remisiones
+              }
+              console.log(lista)
+              console.log(remisionList)
+              console.log(mensaje)
+              await fetch(`http://192.168.10.54:3010/telegram-send-firma/${item.chatid}`,{
+                method: "POST",
+                body: JSON.stringify(mensaje),
+                headers: {"Content-type": "application/json; charset=UTF-8"}
+              } )
+              .then(response => response.json())  // convertir a json
+              .then(json =>{
+                alert('Mensaje de Firma Enviado')
+                $("#bVerificarFirma").css('visibility', 'visible')
+                console.log(json)
+              })    //imprimir los datos en la consola
+              .catch(err => console.log('Solicitud fallida', err)); // Capturar errores        
+                    
+            })
+            /*
+
+select * from sys.tables where name like '%solicitudgar%'
+select * from solicitudAcceso
+select * from solicitudGar_fotos where mediaGroupId = 13480861239748609	--messageId = 2706            
+            */
+
+          })
+
+          $( "#bVerificarFirma" ).on( "click", function() {
+            $("#BREN" + localStorage.getItem('ot')).click()
+          })
+
+
+          $( "#bActualizarRemision" ).on( "click", async function() {
+
+            
+            var valor = {id: solicitud, estado: 'ENTREGADO', area: 'REPUESTO'} 
+            let url = "http://192.168.10.54:3010/garantia-upd-cab";
+            await fetch(url, {
+              method: "POST",
+              body: JSON.stringify(valor),
+              headers: {"Content-type": "application/json; charset=UTF-8"}
+            })
+            .then(response => response.json())  // convertir a json
+            .then(json =>{
+              alert('Datos grabados correctamente !!')
+              window.location.reload()
+
+            })            
+            .catch(err => console.log(err)) 
+            
+
           });
+
           
         }
 

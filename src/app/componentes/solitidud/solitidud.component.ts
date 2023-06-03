@@ -35,20 +35,19 @@ ngOnDestroy(){
 
   ngOnInit() {
      this.suscription = this.websocket.listen('refrescar-solicitud').subscribe((data: any) => {
-     console.log('entro en el socket !!!!');
-          this.recuperarSolicitud();
-
+     console.log('entro en el socket !!!!')
+          this.recuperarSolicitud()
     })
 
     this.suscription2 = this.websocket.listen('solicitando2').subscribe((data: any) => {
       if(data[0].user == localStorage.getItem('user')){
-        return;
+        return
       }
-      console.log(data);
+      console.log(data)
       swal.fire('Atencion','La orden Nro <span class="badge badge-dark" style="font-size:16px;">'+ data[0].orden +'</span> ya esta siendo creada por otro usuario <span class="badge badge-dark" style="font-size:16px;">' + data[0].usuario + '</span> !!!','warning')
       .then(value =>{
-        this.router.navigate(['garantia']); 
-      });
+        //this.router.navigate(['garantia']) 
+      })
     })
    
     $('#vdn').keyup(function () {
@@ -144,8 +143,9 @@ ngOnDestroy(){
               for (let index = 0; index < datos.length; index++) {
                 body += '<tr nuevo="no" id="det-'+datos[index]['idDet']+'">';
                 body += '<td>' + datos[index]['fila'] + (datos[index]['estado'] === 'PENDIENTE' && datos[index]['area'] === 'TALLER' ? '<button type="button" class="btn btn-success btn-sm mb-0 mt-0 ml-1" id="bMotivo-'+ datos[index]['fila'] +'"> <i class="fa fa-edit" aria-hidden="true"></i> </button>' : ''  ) + '</td>' +
-                  '<td>' + datos[index]['incidente'] + '</td>' +
-                  '<td>' + datos[index]['repuesto'] + '</td>' +
+                '<td>' + datos[index]['cantidad'] + '</td>' +
+                '<td>' + datos[index]['incidente'] + '</td>' +
+                '<td>' + datos[index]['repuesto'] + '</td>' +
                   '<td>' + datos[index]['motivo']   + '</td>' +
                   '<td>' + datos[index]['reparacion'] + '</td>'+
                   '<td>' + (datos[index]['piezaCausal'] ?? '') + '</td>';
@@ -159,8 +159,8 @@ ngOnDestroy(){
                   body += '<td><span class="badge badge-info">' + datos[index]['estado2'] + '</span></td>'
                 }
 
-                body += '<td>' + datos[index]['codigoRep'] ?? ''
-                body += '</td>' + '<td>' + datos[index]['nombreRep'] ?? '' + '</td>' 
+                //body += '<td>' + datos[index]['codigoRep'] ?? ''
+                //body += '</td>' + '<td>' + datos[index]['nombreRep'] ?? '' + '</td>' 
                 body += '</td>' + '<td>' + datos[index]['codigoRemision'] ?? '' + '</td>' 
 
 
@@ -183,6 +183,11 @@ ngOnDestroy(){
               $("#tipoGarantia").attr("disabled", true); 
               $("#mecanico").attr("disabled", true); 
               document.querySelector('#piezasSolicitadas').innerHTML = body;
+
+              if( ($("#area").val() == 'GARANTIA' && $("#estado").val() == 'APROBADO') || $("#area").val() == 'REPUESTO' ){
+                $("#bReapertura").css('visibility', 'visible');
+                $("#bCierre").css('visibility', 'visible');
+              } 
 
               for (let index = 0; index < datos.length; index++) {
                 if(datos[index]['estado'] === 'PENDIENTE' && datos[index]['area'] === 'TALLER'){
@@ -322,11 +327,111 @@ ngOnDestroy(){
 
   }
 
+  async reapertura() {
+    let res = prompt('Ingrese el Motivo de la apertura por favor:')
+    if(res){
+      const valor = {
+        usuario:localStorage.getItem('user'),
+        estado: $("#estado").val(),
+        id:$("#id").val(),
+        motivo: res,
+        area: $("#area").val(),
+      }
+  
+      await fetch('http://192.168.10.54:3010/garantia-aprobacion', {
+        method: "POST",
+        body: JSON.stringify(valor),
+        headers: {"Content-type": "application/json; charset=UTF-8"}
+      })
+      .then(json => {
+        alert('Solicitud Enviada correctamente !!!')
+      })
+      .then(async(x)=>{
+        var valor = {id: $('#id').val(), estado: 'PENDIENTE', area: 'GARANTIA'} 
+        let url = "http://192.168.10.54:3010/garantia-upd-cab";
+        await fetch(url, {
+          method: "POST",
+          body: JSON.stringify(valor),
+          headers: {"Content-type": "application/json; charset=UTF-8"}
+        })
+        .catch(err => console.log(err))        
+      })
+      .then(async(x)=>{
+        let url = "http://192.168.10.54:3010/telegram-send";
+        await fetch(url +`?chat_id=-916962805&mensaje=TALLER ${localStorage.getItem('nombre')} ha solicitado la apertura de la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
+        .then(response => response.json())  // convertir a json
+        .then(json => console.log('se envio telegram....'))
+        .catch(err => console.log('Solicitud fallida', err)); // Capturar errores    
+        this.websocket.emit('refrescar-pendientes', {msg: 'ok'})             
+      })
+      .then(x=>{
+        window.location.reload()
+
+      })
+      .catch(err => {console.log(err)
+        alert('hubo un error en la reapertura !!')
+      })
+
+    }   
+
+  }
+
+  async cierre() {
+    let res = prompt('Ingrese el Motivo del cierre por favor:')
+    if(res){
+      const valor = {
+        usuario:localStorage.getItem('user'),
+        estado: 'CERRADO',
+        id:$("#id").val(),
+        motivo: res,
+        area: 'TALLER',
+      }
+  
+      await fetch('http://192.168.10.54:3010/garantia-aprobacion', {
+        method: "POST",
+        body: JSON.stringify(valor),
+        headers: {"Content-type": "application/json; charset=UTF-8"}
+      })
+      .then(json => {
+        alert('Solicitud Cerrada correctamente !!!')
+      })
+      .then(async(x)=>{
+        var valor = {id: $('#id').val(), estado: 'CERRADO', area: 'TALLER'} 
+        let url = "http://192.168.10.54:3010/garantia-upd-cab";
+        await fetch(url, {
+          method: "POST",
+          body: JSON.stringify(valor),
+          headers: {"Content-type": "application/json; charset=UTF-8"}
+        })
+        .catch(err => console.log(err))        
+      })
+      .then(async(x)=>{
+        let url = "http://192.168.10.54:3010/telegram-send";
+        await fetch(url +`?chat_id=-916962805&mensaje=TALLER ${localStorage.getItem('nombre')} ha cerrado la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
+        .then(response => response.json())  // convertir a json
+        .then(json => console.log('se envio telegram....'))
+        .catch(err => console.log('Solicitud fallida', err)); // Capturar errores    
+        this.websocket.emit('refrescar-pendientes', {msg: 'ok'})             
+      })
+      .then(x=>{
+        window.location.reload()
+
+      })
+      .catch(err => {console.log(err)
+        alert('hubo un error en la reapertura !!')
+      })
+
+    }   
+
+  }
+
+
   solicitarPieza() {
     var incidente = $("#incidente").val().toUpperCase();
     var pieza = $("#piezaSolicitada").val().toUpperCase();
     var motivo = $("#motivoReclamo").val().toUpperCase();
     var reparacion = $("#reparacion").val().toUpperCase();
+    var cantidad = $("#cantidad").val();
     var registros = $("#piezasSolicitadas tr").length;
 
     var piezaCauzal = $( "#piezaCausal:checked" ).length > 0 ? 'SI' : '' 
@@ -337,12 +442,13 @@ ngOnDestroy(){
     }
     if ($("tr:contains(" + pieza + ")").length > 0) {
       swal.fire('Ya existen esos registros en la tabla !!', '', 'warning');
-      return;
+      //return;
     }
     var fila = "", valor = "", id = "";
     valor = (registros + 1); //nro de la fila
     fila = '<tr id="f' + valor + '" class="pl-1 pr-1" nuevo="si" >';
     fila += "<td>" + valor + "</td>"; // fila 
+    fila += "<td>" + cantidad + "</td>"; // cantidad 
     fila += "<td>" + incidente.trim() + "</td>"; // pieza solicitada 
     fila += "<td>" + pieza.trim() + "</td>"; // pieza solicitada 
     fila += "<td>" + motivo.trim() + "</td>"; // motivo reclamo 
@@ -421,9 +527,10 @@ ngOnDestroy(){
         return ;
       }
       var valor = [];
-      valor.push( {name: 'id' , value: $('#id').val()}, 
+      /*valor.push( {name: 'id' , value: $('#id').val()}, 
                   {name: 'estado', value: 'MODIFICADO'} 
-                ); 
+                ); */
+      var valor2 = {id: $('#id').val(), estado: 'PENDIENTE', area: 'GARANTIA'} 
       var servidor = window.location.origin;
       var url;
       if (servidor.indexOf('localhost') > 0 ){
@@ -432,8 +539,8 @@ ngOnDestroy(){
         url = servidor + "/garantia-upd-cab";
       }
       var promesa = new Promise((resolve , reject )=>{
-        $.post(url, valor)
-        .done(function (data) {
+        $.post(url, valor2)
+        .done(function (valor) {
           //insertar el detalle 
           var detalle = [];
           var tbl = $("#piezasSolicitadas tr"), celda: any;
@@ -442,17 +549,19 @@ ngOnDestroy(){
             if ($("#piezasSolicitadas tr")[index].getAttribute("nuevo") == 'si') {
               celda = tbl[index].getElementsByTagName('td');
               detalle.push(
-                { name: 'incidente', value: celda[1].innerHTML },
-                { name: 'repuesto', value: celda[2].innerHTML },
-                { name: 'motivo', value: celda[3].innerHTML },
-                { name: 'reparacion', value: celda[4].innerHTML },
-                { name: 'piezaCausal', value: celda[5].innerText },
-                { name: 'estado', value: celda[6].innerText },
+                { name: 'cantidad', value: celda[1].innerHTML },
+                { name: 'incidente', value: celda[2].innerHTML },
+                { name: 'repuesto', value: celda[3].innerHTML },
+                { name: 'motivo', value: celda[4].innerHTML },
+                { name: 'reparacion', value: celda[5].innerHTML },
+                { name: 'piezaCausal', value: celda[6].innerText },
+                { name: 'estado', value: celda[7].innerText },
                 { name: 'parent', value: $('#id').val() },
               );
             }
           }
           console.log(detalle);
+          
           //alert(JSON.stringify(detalle));          
           var servidor = window.location.origin;
           var url;
@@ -564,12 +673,13 @@ ngOnDestroy(){
           for (let index = 0; index < tbl.length; index++) {
             celda = tbl[index].getElementsByTagName('td');
             detalle.push(
-              { name: 'incidente', value: celda[1].innerHTML },
-              { name: 'repuesto', value: celda[2].innerHTML },
-              { name: 'motivo', value: celda[3].innerHTML },
-              { name: 'reparacion', value: celda[4].innerHTML },
-              { name: 'piezaCausal', value: celda[5].innerText },
-              { name: 'estado', value: celda[6].innerText },
+              { name: 'cantidad', value: celda[1].innerHTML },
+              { name: 'incidente', value: celda[2].innerHTML },
+              { name: 'repuesto', value: celda[3].innerHTML },
+              { name: 'motivo', value: celda[4].innerHTML },
+              { name: 'reparacion', value: celda[5].innerHTML },
+              { name: 'piezaCausal', value: celda[6].innerText },
+              { name: 'estado', value: celda[7].innerText },
             { name: 'parent', value: data['rows'][0]['id'] },
             );
           }
@@ -796,6 +906,7 @@ ngOnDestroy(){
           <div class="flex justify-content-end">
             <button type="button" id="bDescargar" class="btn btn-sm btn-info mt-4">Descargar todo</button>
           </div>
+          <div class="flex justify-content-end mt-3 rounded">         
           `        
         })
         .then(e =>{
@@ -804,9 +915,24 @@ ngOnDestroy(){
 
           document.getElementById("bDescargar").addEventListener("click", async ()=>{
 
-            json.forEach((item, x)=>{
-              setTimeout( ()=>{$("#foto-"+ x).click(); console.log('foto ' + x)}, 1000 * (x +1 ));
-            })
+            $( "#bDescargar" ).addClass( "progress-bar progress-bar-striped progress-bar-animated mx-auto" )
+            $( "#bDescargar" ).html( "<b>Descargando...</b>" )
+            fetch(`http://192.168.10.54:3010/garantia-descargar-fotos/${$("#ot").val()}`)
+            .then(response => response.blob())
+            .then(blob => {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = `${$("#ot").val()}.zip`;
+                document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+                a.click();
+                a.remove();  //afterwards we remove the element again
+                $( "#bDescargar" ).removeClass( "progress-bar progress-bar-striped progress-bar-animated mx-auto" )
+                $( "#bDescargar" ).html( "Descargar todo" )                
+
+            });
+
+
 
          }); 
       }else{

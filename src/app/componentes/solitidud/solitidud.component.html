@@ -144,6 +144,7 @@
                     <option value="GARANTIA DE REPUESTOS">Garantia de Repuestos</option>
                     <option value="CAMPAÑA">Campaña</option>
                     <option value="GOODWILL">GoodWill</option>
+                    <option value="GARANTIA GARDEN">Garantia Garden</option>
                   </select>                  
             </div>
           </div>
@@ -288,14 +289,13 @@
                 <thead>
                   <tr>
                     <th class="pl-1 pr-1">Nro</th>
+                    <th>Cantidad</th>
                     <th>Incidente</th>
                     <th>Piezas Solicitadas</th>
                     <th>Diagnostico Tecnico</th>
                     <th>Reparacion</th>
                     <th>Pieza Causal</th>
                     <th>Estado</th>
-                    <th>Codigo</th>
-                    <th>Repuesto</th>
                     <th>Remision</th>
                     <th class="pl-1 pr-1" style="text-align: center;"><i class="fa fa-cogs" aria-hidden="true"></i></th>
                   </tr>
@@ -311,10 +311,10 @@
       <!-- /.card-body -->
 
       <div class="card-footer">
-        <button type="button" id="bSolicitar" class="btn btn-primary" (click)="solicitar()"
-          style="position: relative; float: right;">Solicitar</button>
-          <button type="button" style="position: relative; float: right;" class="btn btn-warning mr-3"><i class="fa fa-print" aria-hidden="true"></i> Imprimir</button>
-
+        <button type="button" id="bSolicitar" class="btn btn-primary" (click)="solicitar()" style="position: relative; float: right;">Solicitar</button>
+        <!-- <button type="button" style="position: relative; float: right;" class="btn btn-warning mr-3"><i class="fa fa-print" aria-hidden="true"></i> Imprimir</button>-->
+        <button type="button" id="bReapertura" class="btn btn-warning mr-3" (click)="reapertura()" style="position: relative; float: right; visibility:hidden;">Re-Apertura</button>
+        <button type="button" id="bCierre" class="btn btn-danger mr-3" (click)="cierre()" style="position: relative; float: right; visibility:hidden;">Cierre</button>
       </div>
     </form>
   </div>
