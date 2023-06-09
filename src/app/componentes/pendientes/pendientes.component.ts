@@ -439,7 +439,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
             button.className = 'btn btn-success'; 
             button.setAttribute('id','BGP'+ orden); //asigar id al boton para luego agregar el evento click.. 
             if(
-              ( listado[0][index]['area'] == 'TALLER'  && ( listado[0][index]['estado'] == 'RECHAZADO' || listado[0][index]['estado'] == 'PENDIENTE'|| listado[0][index]['estado'] == 'MODIFICADO' )) ||
+              //( listado[0][index]['area'] == 'TALLER'  && ( listado[0][index]['estado'] == 'RECHAZADO' || listado[0][index]['estado'] == 'PENDIENTE'|| listado[0][index]['estado'] == 'MODIFICADO' )) ||
               ( listado[0][index]['area'] == 'GARANTIA'  && listado[0][index]['estado'] == 'APROBADO') ||
               listado[0][index]['area'] == 'REPUESTO' || listado[0][index]['area'] == 'SOLICITUD'  
               ){ button.disabled = true; } 

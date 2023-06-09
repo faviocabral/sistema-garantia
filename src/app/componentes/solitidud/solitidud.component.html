@@ -242,7 +242,15 @@
                 readonly>
             </div>
           </div>
+        </div>
 
+        <div class="row mr-1 ml-1">
+          <div class="col-sm-12">
+            <div class="form-group">
+              <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> Sintoma Tecnico:</label>
+              <input type="text" class="form-control text-uppercase" id="sintoma" name="sintoma" placeholder="Sintoma tecnico" required>
+            </div>
+          </div>
         </div>
 
         <div class="row mr-1 ml-1">
@@ -307,14 +315,40 @@
           </div>
         </div>
 
+        <div class="row mr-1 ml-1 mt-4">
+          <div class="col">
+            <button type="button" id="bSolicitar" class="btn btn-primary" (click)="solicitar()" style="position: relative; float: right;">Solicitar</button>
+            <!-- <button type="button" style="position: relative; float: right;" class="btn btn-warning mr-3"><i class="fa fa-print" aria-hidden="true"></i> Imprimir</button>-->
+            <button type="button" id="bReapertura" class="btn btn-warning mr-3" (click)="reapertura()" style="position: relative; float: right; visibility:hidden;">Re-Apertura</button>
+            <button type="button" id="bCierre" class="btn btn-danger mr-3" (click)="cierre()" style="position: relative; float: right; visibility:hidden;">Cierre</button>
+    
+          </div>
+        </div>
+
+
+        <div class="row mr-1 ml-1 mt-4">
+          <div class="col">
+            <h4 class="bg-danger rounded"><i class="fa fa-database ml-1" aria-hidden="true"></i> DETALLE DE LA REMISION</h4>
+            <div class="table-responsive" style="border-radius: 5px;">
+              <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-3" id="detalle">
+                <thead id="cabRemision" >
+                </thead>
+                <tbody id="detalleRemision">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </div>
       <!-- /.card-body -->
 
       <div class="card-footer">
+        <!--
         <button type="button" id="bSolicitar" class="btn btn-primary" (click)="solicitar()" style="position: relative; float: right;">Solicitar</button>
-        <!-- <button type="button" style="position: relative; float: right;" class="btn btn-warning mr-3"><i class="fa fa-print" aria-hidden="true"></i> Imprimir</button>-->
         <button type="button" id="bReapertura" class="btn btn-warning mr-3" (click)="reapertura()" style="position: relative; float: right; visibility:hidden;">Re-Apertura</button>
         <button type="button" id="bCierre" class="btn btn-danger mr-3" (click)="cierre()" style="position: relative; float: right; visibility:hidden;">Cierre</button>
+        -->
       </div>
     </form>
   </div>

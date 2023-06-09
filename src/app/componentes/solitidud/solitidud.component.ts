@@ -123,6 +123,42 @@ ngOnDestroy(){
 
           this.recuperarServiciosTerceros()
 
+          //si tiene remision traer los datos... 
+          fetch(`http://192.168.10.54:3010/garantia-repuesto/${ot}`)
+          .then(response => response.json())  // convertir a json
+          .then(json =>{
+            console.log('lista de remision ', json)
+            let body = ''
+            if(json.remision.length > 0){
+              json.remision.forEach(item=>{
+                body += `
+                        <tr>
+                          <td>${item.REMISION}</td> 
+                          <td>${item.CODIGO}</td> 
+                          <td>${item.ARTICULO}</td> 
+                          <td>${item.CANTIDAD}</td> 
+                          <td>${item.fecha +' '+ item.hora}</td> 
+                          <td>${item.userCreate}</td> 
+                          <td>${item.firmado}</td> 
+                        </tr>
+                        `
+              })
+              let cabRemision = `
+              <th>REMISION</th>
+              <th>CODIGO</th>
+              <th>ARTICULO</th>
+              <th>CANTIDAD</th>
+              <th>FECHA</th>
+              <th>EMISOR</th>
+              <th>FIRMADO POR</th>              
+              `
+              $("#cabRemision").html(cabRemision)
+              $("#detalleRemision").html(body )
+            }
+
+          })    //imprimir los datos en la consola
+          .catch(err => console.log('Solicitud fallida', err)); // Capturar errores
+
           //ver si ya tiene activo traer los datos como estan... 
           var usuario = localStorage.getItem('user');
           var area = localStorage.getItem('area');
@@ -177,11 +213,13 @@ ngOnDestroy(){
               $("#id").val(datos[0]['id']);//se recupera de la primera fila .
               $("#mecanico").val(datos[0]['mecanico']);//se recupera de la primera fila .
               $("#jefeGrupo").val(datos[0]['nombreJefeGrupo']);//se recupera de la primera fila .
+              $("#sintoma").val(datos[0]['sintoma']);//se recupera de la primera fila .
               //$("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
 
               $("#vdn").attr('readonly', true);
               $("#tipoGarantia").attr("disabled", true); 
               $("#mecanico").attr("disabled", true); 
+              $("#sintoma").attr("disabled", true); 
               document.querySelector('#piezasSolicitadas').innerHTML = body;
 
               if( ($("#area").val() == 'GARANTIA' && $("#estado").val() == 'APROBADO') || $("#area").val() == 'REPUESTO' ){
