@@ -57,6 +57,7 @@ export class TableroComponent implements OnInit {
         // timer: 3000,
         // timerProgressBar: true
     });
+   
 };
 
 ngOnDestroy(){ 

@@ -56,6 +56,12 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() { 
+    //para definir la url global
+    if(window.location.origin.includes('localhost')){
+      localStorage.setItem('url', 'http://192.168.10.54:3010')
+    }else{
+      localStorage.setItem('url', window.location.origin)
+    }
     
     window.addEventListener("beforeunload", (e) =>{
       this.websocket.emit('cancelar-solicitud', { usuario: localStorage.getItem('nombre') ,user: localStorage.getItem('user') });

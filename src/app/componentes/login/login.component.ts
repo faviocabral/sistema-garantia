@@ -10,6 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MessagingService } from '../../servicios/messaging.service';
 import { LoginService } from 'src/app/servicios/login.service';
 
+const URL = localStorage.getItem('url');
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -25,6 +26,7 @@ export class LoginComponent implements OnInit {
 
     setTimeout(() => this.loginINfo.loginInfo2 = false );
     //asyncFunctionCall().then(res => { this.loginINfo.loginInfo2 = false; })    
+  
   }
 
   login() {
@@ -39,13 +41,8 @@ export class LoginComponent implements OnInit {
     }
 
     let promesa = new Promise( (resolve, reject )=> {
-      var servidor = window.location.origin;
-      if (servidor.indexOf('localhost') >0 ){
-        var url = "http://192.168.10.54:3010/garantia-login?usuario=" + usuario + "&pass=" + pass; 
-      }else{
-        var url = servidor + "/garantia-login?usuario=" + usuario + "&pass=" + pass; 
-      }
-      $.get(url, function (data, status) { 
+
+      $.get(URL + "/garantia-login?usuario=" + usuario + "&pass=" + pass, function (data, status) { 
         console.log(data['rows'].length); 
         var datos = data['rows']; 
         if (datos.length > 0) { 

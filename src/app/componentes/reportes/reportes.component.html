@@ -5,7 +5,7 @@
                 <form id="formBuscar" class="form-inline ml-2" >
                     <input type="date" id="fechai" (click) = "$event.target.select()" name="table_search" class="form-control float-right" placeholder="" style="width: 170px ;">
                     <input type="date" id="fechaf" (click) = "$event.target.select()" name="table_search" class="form-control float-right" placeholder="" style="width: 170px ;">
-                    <button type="button" class="btn btn-primary ml-2 elevation-1"><strong>Buscar</strong></button>
+                    <button type="button" class="btn btn-primary ml-2 elevation-1" (click)="buscar()"><strong>Buscar</strong></button>
                     <button type="reset" class="btn btn-danger ml-2 elevation-1"><strong>Limpiar</strong></button>
                     <span style="font-size: 28px; margin-left: auto; margin-right: auto;"><strong>REPORTES</strong></span>
                 </form> 

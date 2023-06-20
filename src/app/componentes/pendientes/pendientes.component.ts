@@ -16,6 +16,7 @@ import { ThisReceiver } from '@angular/compiler';
 import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
 
+const URL = localStorage.getItem('url');
 @Component({
   selector: 'app-pendientes',
   templateUrl: './pendientes.component.html',
@@ -25,12 +26,13 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
   suscription : Subscription;
 
   constructor(private loginInfo: AuthService, private router: Router,private websocket: WebsocketService,private toastr: ToastrService ) {
-
+    
    }
    ngOnDestroy(){ 
     this.suscription.unsubscribe(); 
     }
   ngOnInit() { 
+    
     this.suscription = this.websocket.listen('refrescar-pendientes').subscribe((data: any) => {
       this.pendientes();
     })
@@ -47,7 +49,6 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
     }
     $('#pendientes').height(window.innerHeight - 215 );
     
-
   }
 
   ngAfterViewInit(){
@@ -129,14 +130,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
       //var fechaf = $("#fechaf").val().replaceAll("-", ""); 
       var usuario = localStorage.getItem('user');
       var area = localStorage.getItem('area');
-      var servidor = window.location.origin;
-      var url = "" ;
-      if (servidor.indexOf('localhost') >0 ){
-        url = "http://192.168.10.54:3010/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area ;
-      }else{
-        url = servidor + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area ; 
-      }
-      $.get(url, function(data, status){
+
+      $.get(URL+ "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area, function(data, status){
         console.log('estado de la consulta ', status );
       })
       .done((rs)=>{ 
@@ -576,15 +571,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
   }
 
   log(solicitud){
-    var url;
-    var servidor = window.location.origin;    
-    if (servidor.indexOf('localhost') >0 ){
-      url = "http://192.168.10.54:3010/garantia-log?solicitud=" + solicitud ; 
-    }else{
-      url = servidor + "/garantia-log?solicitud=" + solicitud ;
-    }
     
-    $.get( url ) 
+    $.get( URL + "/garantia-log?solicitud=" + solicitud ) 
     .done(function( data ) { 
       console.log('datos del log: ');
       console.log(data['rows'][0]['fecha']); 
@@ -717,16 +705,9 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
     }
   
     console.log(datos);
-    let url = ''
-    var servidor = window.location.origin;    
-    if (servidor.indexOf('localhost') >0 ){
-      url = "http://192.168.10.54:3010/garantia-aprobacion";
-    }else{
-      url = servidor + "/garantia-aprobacion";
-    }
     var promesa = new Promise((resolve , reject )=>{
         
-      $.post( url, datos  ) 
+      $.post(URL + `/garantia-aprobacion`, datos  ) 
       .done(function( data ) { 
         console.log(data); 
         swal.fire('Datos Grabados correctamente...'); 
@@ -759,12 +740,11 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
           area: area 
       });
       if(area === 'REPUESTO' || area === 'GARANTIA'){
-        await fetch("http://192.168.10.54:3010/garantia-chatId/" + operario )
+        await fetch(URL+"/garantia-chatId/" + operario )
         .then(response => response.json())  // convertir a json
         .then(async(json) => {
           const chatId = json[0].chat_id;
-          url = "http://192.168.10.54:3010/telegram-send";
-          await fetch(url +`?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${ot} motivo ${motivo}` )
+          await fetch(URL +`/telegram-send?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${ot} motivo ${motivo}` )
             .then(response => response.json())  // convertir a json
             .then(json => console.log('se envio telegram....'))
             .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
@@ -783,15 +763,9 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
     if(area == 'REPUESTO' && estado == 'ENTREGADO'){
       //controlamos si existen remision para repuesto 
       // Solicitud GET (Request).
-      var url='', control=0;
-      let remision = '' , detalle = '' , mecanicos=''
-      var servidor = window.location.origin;
-      if (servidor.indexOf('localhost') >0 ){
-        url = "http://192.168.10.54:3010/garantia-repuesto";
-      }else{
-        url = servidor + "/garantia-repuesto";
-      }        
-      await fetch(url + '/' + ot)
+      var control=0;
+      let remision = '' , detalle = '' , mecanicos=''       
+      await fetch(URL + '/garantia-repuesto/' + ot)
         // Exito
         .then(response => response.json())  // convertir a json
         .then(json => {
@@ -1007,7 +981,7 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
               console.log(lista)
               console.log(remisionList)
               console.log(mensaje)
-              await fetch(`http://192.168.10.54:3010/telegram-send-firma/${item.chatid}`,{
+              await fetch(URL + `/telegram-send-firma/${item.chatid}`,{
                 method: "POST",
                 body: JSON.stringify(mensaje),
                 headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -1039,8 +1013,7 @@ select * from solicitudGar_fotos where mediaGroupId = 13480861239748609	--messag
 
             
             var valor = {id: solicitud, estado: 'ENTREGADO', area: 'REPUESTO'} 
-            let url = "http://192.168.10.54:3010/garantia-upd-cab";
-            await fetch(url, {
+            await fetch(URL + `/garantia-upd-cab`, {
               method: "POST",
               body: JSON.stringify(valor),
               headers: {"Content-type": "application/json; charset=UTF-8"}

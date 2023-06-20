@@ -11,6 +11,7 @@ import { WebsocketService } from 'src/app/servicios/websocket.service';
 import { info } from 'console';
 import { Subscription } from 'rxjs';
 
+const URL = localStorage.getItem('url');
 @Component({
   selector: 'app-solitidud',
   templateUrl: './solitidud.component.html',
@@ -34,6 +35,7 @@ ngOnDestroy(){
 }
 
   ngOnInit() {
+   
      this.suscription = this.websocket.listen('refrescar-solicitud').subscribe((data: any) => {
      console.log('entro en el socket !!!!')
           this.recuperarSolicitud()
@@ -57,25 +59,18 @@ ngOnDestroy(){
   }
 
   recuperarSolicitud(){
-
     let ot = this.route.snapshot.paramMap.get('id');
     if (Number(ot) != 0) {
       $("#bSolicitar").text("Actualizar")
       //this.notificacion.getToken();// trae el token que genero el usuario... 
       //this.notificacion.sendPush('Garantia', 'Nueva Solicitud de ' + String(ot) );
       //las notificaciones se van a enviar desde el servidor 
-      var url;
-      var servidor = window.location.origin;
-      if (servidor.indexOf('localhost') >0 ){
-        url = "http://192.168.10.54:3010/garantia-solicitud?ot=" + ot;
-      }else{
-        url = servidor + "/garantia-solicitud?ot=" + ot;
-      }
+
        
-      $.get(url, function (data, status) {
+      $.get(URL +"/garantia-solicitud?ot=" + ot, function (data, status) {
         console.log('estado de la consulta ', status);
       })
-        .done((rs) => {
+        .done(async(rs) => {
           //console.log(rs['rows'].length); 
           //console.log(rs['rows'][0]); 
           var rs2 = rs['rows'][0];
@@ -91,14 +86,7 @@ ngOnDestroy(){
               $(campo).val(rs2[key]);
             });
 
-            //var servidor = window.location.origin;
-            if (servidor.indexOf('localhost') >0 ){
-              url = "http://192.168.10.54:3010/garantia-servicios?vin=" + rs2['vin'];
-            }else{
-              url = servidor + "/garantia-servicios?vin=" + rs2['vin'];
-            }
-      
-            $.get(url, function (data, status) {
+            $.get(URL + "/garantia-servicios?vin=" + rs2['vin'], function (data, status) {
               console.log('estado de la consulta ', status);
               console.log(data['rows'].length);
               var datos = data['rows'];
@@ -124,7 +112,7 @@ ngOnDestroy(){
           this.recuperarServiciosTerceros()
 
           //si tiene remision traer los datos... 
-          fetch(`http://192.168.10.54:3010/garantia-repuesto/${ot}`)
+          await fetch(URL+`/garantia-repuesto/${ot}`)
           .then(response => response.json())  // convertir a json
           .then(json =>{
             console.log('lista de remision ', json)
@@ -162,13 +150,8 @@ ngOnDestroy(){
           //ver si ya tiene activo traer los datos como estan... 
           var usuario = localStorage.getItem('user');
           var area = localStorage.getItem('area');
-          if (servidor.indexOf('localhost') >0 ){
-            url = "http://192.168.10.54:3010/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area;
-          }else{
-            url = servidor + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area;
-          }
        
-          $.get(url, function (data, status) {
+          $.get(URL + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area, async function (data, status) {
             //si ya existe la solicitud recuperar los datos.. 
             if (data['rows'].length > 0) {
               var datos = data['rows'];
@@ -236,7 +219,7 @@ ngOnDestroy(){
                     let res = prompt('Ingrese el nuevo diagnostico de la pieza '+datos[index]['repuesto']+' por favor:')
                     if(res){
 
-                      fetch('http://192.168.10.54:3010/garantia-upd-det-motivo/' + datos[index]['idDet'], {
+                      await fetch(URL+'/garantia-upd-det-motivo/' + datos[index]['idDet'], {
                         method: "POST",
                         body: JSON.stringify({motivo: res.toUpperCase()}),
                         headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -265,15 +248,7 @@ ngOnDestroy(){
                     if(confirm(" Desea asignar como pieza causal al repuesto "+ pieza.repuesto +" del incidente "+pieza.incidente+" ?")){
                       
                       //this.actualizarDetallePiezaCausal(pieza.nro, pieza.idDet, {piezaCausal:'SI'})
-                      var servidor = window.location.origin;
-                      var url;
-                      if (servidor.indexOf('localhost') > 0 ){
-                        url = "http://192.168.10.54:3010/garantia-upd-det";
-                      }else{
-                        url = servidor + "/garantia-upd-det";
-                      }
-                      alert(url + `/${pieza.nro}/${pieza.idDet}`)
-                      await fetch(url + `/${pieza.nro}/${pieza.idDet}`, {
+                      await fetch(URL + "/garantia-upd-det" + `/${pieza.nro}/${pieza.idDet}`, {
                         method: "POST",
                         body: JSON.stringify({piezaCausal:'SI'}),
                         headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -343,16 +318,8 @@ ngOnDestroy(){
   }
 
 
-  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
-    alert('entro para actualziar')
-    var servidor = window.location.origin;
-    var url;
-    if (servidor.indexOf('localhost') > 0 ){
-      url = "http://192.168.10.54:3010/garantia-upd-det";
-    }else{
-      url = servidor + "/garantia-upd-det";
-    }    
-    fetch(url + `/${idCab}/${idDet}`, {
+async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
+    await fetch(URL + `/garantia-upd-det/${idCab}/${idDet}`, {
       method: "POST",
       body: JSON.stringify(datos),
       headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -376,7 +343,7 @@ ngOnDestroy(){
         area: $("#area").val(),
       }
   
-      await fetch('http://192.168.10.54:3010/garantia-aprobacion', {
+      await fetch(URL+'/garantia-aprobacion', {
         method: "POST",
         body: JSON.stringify(valor),
         headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -386,8 +353,7 @@ ngOnDestroy(){
       })
       .then(async(x)=>{
         var valor = {id: $('#id').val(), estado: 'PENDIENTE', area: 'GARANTIA'} 
-        let url = "http://192.168.10.54:3010/garantia-upd-cab";
-        await fetch(url, {
+        await fetch(URL + `/garantia-upd-cab`, {
           method: "POST",
           body: JSON.stringify(valor),
           headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -395,8 +361,7 @@ ngOnDestroy(){
         .catch(err => console.log(err))        
       })
       .then(async(x)=>{
-        let url = "http://192.168.10.54:3010/telegram-send";
-        await fetch(url +`?chat_id=-916962805&mensaje=TALLER ${localStorage.getItem('nombre')} ha solicitado la apertura de la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
+        await fetch(URL  +`/telegram-send?chat_id=-916962805&mensaje=TALLER ${localStorage.getItem('nombre')} ha solicitado la apertura de la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
         .then(response => response.json())  // convertir a json
         .then(json => console.log('se envio telegram....'))
         .catch(err => console.log('Solicitud fallida', err)); // Capturar errores    
@@ -425,7 +390,7 @@ ngOnDestroy(){
         area: 'TALLER',
       }
   
-      await fetch('http://192.168.10.54:3010/garantia-aprobacion', {
+      await fetch(URL + '/garantia-aprobacion', {
         method: "POST",
         body: JSON.stringify(valor),
         headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -435,8 +400,7 @@ ngOnDestroy(){
       })
       .then(async(x)=>{
         var valor = {id: $('#id').val(), estado: 'CERRADO', area: 'TALLER'} 
-        let url = "http://192.168.10.54:3010/garantia-upd-cab";
-        await fetch(url, {
+        await fetch(URL + "/garantia-upd-cab", {
           method: "POST",
           body: JSON.stringify(valor),
           headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -444,8 +408,7 @@ ngOnDestroy(){
         .catch(err => console.log(err))        
       })
       .then(async(x)=>{
-        let url = "http://192.168.10.54:3010/telegram-send";
-        await fetch(url +`?chat_id=-916962805&mensaje=TALLER ${localStorage.getItem('nombre')} ha cerrado la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
+        await fetch(URL +`/telegram-send?chat_id=-916962805&mensaje=TALLER ${localStorage.getItem('nombre')} ha cerrado la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
         .then(response => response.json())  // convertir a json
         .then(json => console.log('se envio telegram....'))
         .catch(err => console.log('Solicitud fallida', err)); // Capturar errores    
@@ -523,13 +486,7 @@ ngOnDestroy(){
 
   async listo(){
       var valor = {id: $('#id').val(), estado: 'PENDIENTE', area: 'GARANTIA'} 
-      var url; var servidor = window.location.origin;
-      if (servidor.indexOf('localhost') > 0 ){
-        url = "http://192.168.10.54:3010/garantia-upd-cab";
-      }else{
-        url = servidor + "/garantia-upd-cab";
-      }
-      await fetch(url, {
+      await fetch(URL + `/garantia-upd-cab`, {
         method: "POST",
         body: JSON.stringify(valor),
         headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -540,8 +497,7 @@ ngOnDestroy(){
 
         this.websocket.emit('solicitud', { mensaje: 'El '+ localStorage.getItem('area') +' '+ localStorage.getItem('nombre') +' ha modificado una solicitud OT Nro ' + $("#ot").val() + ' !!!', para: localStorage.getItem('user'), area: $("#area").val() });
         this.websocket.emit('refrescar-pendientes', {msg: 'ok'})
-        url = "http://192.168.10.54:3010/telegram-send";
-        await fetch(url +`?chat_id=${-916962805}&mensaje=${localStorage.getItem('nombre')} ha modificado solicitud nro OT ${$("#ot").val()} \n http://192.168.10.54:3010/garantia/Solicitud/${$("#ot").val()} `)
+        await fetch(URL +`/telegram-send?chat_id=${-916962805}&mensaje=${localStorage.getItem('nombre')} ha modificado solicitud nro OT ${$("#ot").val()} \n ${URL}/garantia/Solicitud/${$("#ot").val()} `)
           .then(response => response.json())  // convertir a json
           .then(json => console.log('se envio telegram....'))
           .then(json =>{
@@ -569,15 +525,8 @@ ngOnDestroy(){
                   {name: 'estado', value: 'MODIFICADO'} 
                 ); */
       var valor2 = {id: $('#id').val(), estado: 'PENDIENTE', area: 'GARANTIA'} 
-      var servidor = window.location.origin;
-      var url;
-      if (servidor.indexOf('localhost') > 0 ){
-        url = "http://192.168.10.54:3010/garantia-upd-cab";
-      }else{
-        url = servidor + "/garantia-upd-cab";
-      }
       var promesa = new Promise((resolve , reject )=>{
-        $.post(url, valor2)
+        $.post(URL + `/garantia-upd-cab`, valor2)
         .done(function (valor) {
           //insertar el detalle 
           var detalle = [];
@@ -599,17 +548,8 @@ ngOnDestroy(){
             }
           }
           console.log(detalle);
-          
-          //alert(JSON.stringify(detalle));          
-          var servidor = window.location.origin;
-          var url;
-          if (servidor.indexOf('localhost') >0 ){
-            url = "http://192.168.10.54:3010/garantia-ins-det";
-          }else{
-            url = servidor + "/garantia-ins-det";
-          }
     
-          $.post(url, detalle)
+          $.post(URL + `/garantia-ins-det`, detalle)
             .done(function (data) {
               console.log('inserto detalle ... ');
               console.log(data);
@@ -669,14 +609,7 @@ ngOnDestroy(){
       }
 
       //controlamos si ya adjunto las fotos a la solicitud 
-      var url;
-      var servidor = window.location.origin;
-      if (servidor.indexOf('localhost') >0 ){
-        url = "http://192.168.10.54:3010/garantia-fotos";
-      }else{
-        url = servidor + "/garantia-fotos";
-      }
-      await fetch(url + '/' + $("#ot").val())
+      await fetch(URL + '/garantia-fotos/' + $("#ot").val())
       .then(response => response.json())  // convertir a json
       .then(json => {
         console.log('tiene imagenes... ',json)
@@ -691,16 +624,9 @@ ngOnDestroy(){
       valor.push({ name: 'usuario', value: localStorage.getItem('user') });
       //console.log('valores del array.. ');
       //console.log(valor);
-      var servidor = window.location.origin;
-
-      if (servidor.indexOf('localhost') >0 ){
-        url = "http://192.168.10.54:3010/garantia-ins-cab";
-      }else{
-        url = servidor + "/garantia-ins-cab";
-      }
       var promesa = new Promise((resolve , reject )=>{
 
-      $.post(url, valor)
+      $.post(URL + `/garantia-ins-cab`, valor)
         .done(function (data) {
           //sapo..
           console.log('inserto la cabecera... ');
@@ -721,15 +647,8 @@ ngOnDestroy(){
             { name: 'parent', value: data['rows'][0]['id'] },
             );
           }
-          var servidor = window.location.origin;
-          var url;
-          if (servidor.indexOf('localhost') >0 ){
-            url = "http://192.168.10.54:3010/garantia-ins-det";
-          }else{
-            url = servidor + "/garantia-ins-det";
-          }
     
-          $.post(url, detalle)
+          $.post(URL + `/garantia-ins-det`, detalle)
             .done(function (data) {
               console.log('inserto detalle ... ');
               console.log(data);
@@ -759,11 +678,9 @@ ngOnDestroy(){
         //caso que haya grabado todo ..... 
         this.websocket.emit('solicitud', { mensaje: 'El '+ localStorage.getItem('area') +' '+ localStorage.getItem('nombre') +' ha creado una nueva solicitud para la OT Nro ' + $("#ot").val() + ' !!!', para: localStorage.getItem('user'), area: $("#area").val() });
       })
-      .then((value)=>{
-        var url;
-        url = "http://192.168.10.54:3010/telegram-send";
+      .then(async(value)=>{
         // Solicitud GET (Request).
-        fetch(url +`?chat_id=${-916962805}&mensaje=${localStorage.getItem('nombre')} ha creado una nueva solicitud nro OT ${$("#ot").val()} \n http://192.168.10.54:3010/garantia/Solicitud/${$("#ot").val()} `)
+        await fetch(URL +`/telegram-send?chat_id=${-916962805}&mensaje=${localStorage.getItem('nombre')} ha creado una nueva solicitud nro OT ${$("#ot").val()} \n ${URL}/garantia/Solicitud/${$("#ot").val()} `)
           // Exito
           .then(response => response.json())  // convertir a json
           .then(json => console.log('se envio telegram....'))    //imprimir los datos en la consola
@@ -828,7 +745,7 @@ ngOnDestroy(){
 
   }
 
-  insertarServicioTercero(){
+ async insertarServicioTercero(){
  
     var detalle = [];
     var tbl = $("#detServicioTercero tr") , celda: any;
@@ -849,14 +766,7 @@ ngOnDestroy(){
       }      
     }
     console.log(detalle)
-    var servidor = window.location.origin;
-    var url;
-    if (servidor.indexOf('localhost') >0 ){
-      url = "http://192.168.10.54:3010/garantia-ins-ser-ter";
-    }else{
-      url = servidor + "/garantia-ins-ser-ter";
-    }
-    fetch(url, {
+    await fetch(URL + `/garantia-ins-ser-ter`, {
       method: "POST",
       body: JSON.stringify(detalle),
       headers: {"Content-type": "application/json; charset=UTF-8"}
@@ -877,18 +787,10 @@ ngOnDestroy(){
 
   }
 
-  recuperarServiciosTerceros(){
+  async recuperarServiciosTerceros(){
     $('#detServicioTercero > *').remove()    
-        
-    var servidor = window.location.origin;
-    var url;
-    if (servidor.indexOf('localhost') >0 ){
-      url = "http://192.168.10.54:3010/garantia-ser-ter";
-    }else{
-      url = servidor + "/garantia-ser-ter";
-    }
     // Solicitud GET (Request).
-    fetch(url +'/'+ $("#ot").val())
+    await fetch(URL +'/garantia-ser-ter/'+ $("#ot").val())
       // Exito
       .then(response => response.json())  // convertir a json
       .then(json =>{
@@ -913,39 +815,39 @@ ngOnDestroy(){
   }
 
 
-  linkCM(){
-    var servidor = window.location.origin;
-    var url;
-    if (servidor.indexOf('localhost') >0 ){
-      url = "http://192.168.10.54:3010/garantia-fotos/";
-    }else{
-      url = servidor + "/garantia-fotos/";
-    }
+  async linkCM(){
     // Solicitud GET (Request).
-    console.log(url + $("#ot").val())
-    fetch(url + $("#ot").val())
+    await fetch(URL +`/garantia-fotos/`+ $("#ot").val())
     // Exito
     .then(response => response.json())  // convertir a json
     .then(json =>{
       console.log(json)
       if(json.length > 0){
-          let imagenes = ''
+          let imagenes = '' ,indicador=''
           json.forEach((item, x)=>{
-            imagenes += ` <a class="" href="${item}" download="${$("#ot").val()+'_'+x}.jpg" ><img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="120" height="120" data-toggle="tooltip" data-placement="top" title="click descarga individual"></a> \n`
+            //imagenes += ` <a class="" href="${item}" download="${$("#ot").val()+'_'+x}.jpg" ><img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="70" height="70" data-toggle="tooltip" data-placement="top" title="click descarga individual"></a> \n`
+            imagenes += ` <img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
+
           })
-        swal.fire({
-          title: `<strong><u>Fotos (${json.length })</u></strong>`,
-          showCloseButton: true,
-          showConfirmButton: false,
-          html:`
-          <div class="container-fluid" id="myfotos">
+          console.log(imagenes)
+          console.log(indicador)
+          let pantalla = `
+          <div class="flex justify-content-start" id="myfotos">
             ${imagenes}
+          </div>
+          <div class="container-fluid" id="fotoGrande">
+          
           </div>
           <div class="flex justify-content-end">
             <button type="button" id="bDescargar" class="btn btn-sm btn-info mt-4">Descargar todo</button>
           </div>
-          <div class="flex justify-content-end mt-3 rounded">         
-          `        
+          `
+        swal.fire({
+          title: `<strong><u>Fotos (${json.length })</u></strong>`,
+          showCloseButton: true,
+          showConfirmButton: false,
+          html: pantalla,
+          width: '100%',
         })
         .then(e =>{
     
@@ -955,7 +857,7 @@ ngOnDestroy(){
 
             $( "#bDescargar" ).addClass( "progress-bar progress-bar-striped progress-bar-animated mx-auto" )
             $( "#bDescargar" ).html( "<b>Descargando...</b>" )
-            fetch(`http://192.168.10.54:3010/garantia-descargar-fotos/${$("#ot").val()}`)
+            await fetch(URL + `/garantia-descargar-fotos/${$("#ot").val()}`)
             .then(response => response.blob())
             .then(blob => {
                 var url = window.URL.createObjectURL(blob);
