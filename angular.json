@@ -44,7 +44,7 @@
               "node_modules/push.js/bin/serviceWorker.min.js",
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/jquery-ui-dist/jquery-ui.min.js",
-              "node_modules/pivottable/dist/pivot.min.js"
+              "node_modules/pivottable/dist/pivot.min.js" 
             ]
           },
           "configurations": {

@@ -826,7 +826,12 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
           let imagenes = '' ,indicador=''
           json.forEach((item, x)=>{
             //imagenes += ` <a class="" href="${item}" download="${$("#ot").val()+'_'+x}.jpg" ><img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="70" height="70" data-toggle="tooltip" data-placement="top" title="click descarga individual"></a> \n`
-            imagenes += ` <img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
+            if(item.includes('.mp4')){
+              imagenes += `<video width="320" height="240" id="foto-${x}" controls> <source src="${item}" type="video/mp4"> </video> \n`
+
+            }else{
+              imagenes += ` <img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
+            }
 
           })
           console.log(imagenes)
