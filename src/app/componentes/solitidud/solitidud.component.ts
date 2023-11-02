@@ -12,6 +12,7 @@ import { info } from 'console';
 import { Subscription } from 'rxjs';
 
 const URL = localStorage.getItem('url');
+let G_listMob = []
 @Component({
   selector: 'app-solitidud',
   templateUrl: './solitidud.component.html',
@@ -814,6 +815,50 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
       .catch(err => console.log('Solicitud fallida', err)); // Capturar errores
   }
 
+  async guardarMob(){
+    alert(JSON.stringify(G_listMob))
+  }
+  
+  
+  async agregarMob(){
+    let listMob = [] 
+    listMob.push({codigo: $("#codigoMob").val() , descripcion: $("#descripcionMob").val(), cantidad: $("#cantidadMob").val(), estado: 'NUEVO' })
+    let fila = $('#detalleMob').find('tr').length + 1
+    G_listMob.push({id: `mob-${fila}`, codigo: $("#codigoMob").val(), descripcion: $("#descripcionMob").val(), cantidad:$("#cantidadMob").val(), estado: 'NUEVO' })
+    let detalleMob = listMob.map((item,x)=> `<tr id='mob-${fila}'> 
+                                          <td>${item.codigo}</td>
+                                          <td>${item.descripcion}</td>
+                                          <td>${item.cantidad}</td>
+                                          <td>${item.estado}</td>
+                                          <td class="pl-1 pr-1 text-center"><button type="button" id='bFilaMob-${fila}' class="btn btn-danger btn-sm m-0" > <i class="fa fa-trash-alt" aria-hidden="true"></i> </button></td>
+                                        </tr>` )
+    $("#detalleMob").append(detalleMob)
+  
+    //para eliminar filas 
+    document.getElementById(`bFilaMob-${fila}`).addEventListener("click", async ()=>{
+      G_listMob = G_listMob.filter(item=> item.id !== 'mob-'+fila)
+      console.log(G_listMob)
+      document.getElementById('mob-'+fila).remove()
+      if (  $('#detalleMob').find('tr').length === 0 )  $("#bGuardarMob").css('display', 'none')
+    })
+
+
+    if(document.getElementById(`bGuardarMob`).getAttribute('listener') === 'false' ){
+      document.getElementById(`bGuardarMob`).setAttribute('listener', 'true')
+      //para guardar mob
+      // document.getElementById(`bGuardarMob`).addEventListener("click", async ()=>{
+      //   alert('guardar mob')
+      // })
+    }
+  
+    $("#codigoMob").val('')
+    $("#descripcionMob").val('')
+    $("#cantidadMob").val('')
+    $("#codigoMob").focus()
+    $("#bGuardarMob").css('display', 'block')
+    console.log('mano de obra ... ', G_listMob)
+}
+
 
   async linkCM(){
     // Solicitud GET (Request).
@@ -826,8 +871,8 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
           let imagenes = '' ,indicador=''
           json.forEach((item, x)=>{
             //imagenes += ` <a class="" href="${item}" download="${$("#ot").val()+'_'+x}.jpg" ><img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="70" height="70" data-toggle="tooltip" data-placement="top" title="click descarga individual"></a> \n`
-            if(item.includes('.mp4')){
-              imagenes += `<video width="320" height="240" id="foto-${x}" controls> <source src="${item}" type="video/mp4"> </video> \n`
+            if(item.includes('videos')){
+              imagenes += `<video width="320" height="240" id="foto-${x}" controls> <source src="${item }" type="video/mp4"> </video> \n`
 
             }else{
               imagenes += ` <img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`

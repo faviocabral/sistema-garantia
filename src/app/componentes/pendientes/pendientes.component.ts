@@ -371,7 +371,31 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
             document.getElementById('BNRO'+ listado[0][index]['nro'] ).addEventListener('click',()=>{ //se agrega el evento ... 
               this.solicitar(listado[0][index]['ot']);
             }); 
-  
+
+            /* area de volver a la solicitud para consultar o modificar  */
+            button = document.createElement('button'); //creamos un buton para ver el detalle.. 
+            button.innerHTML= ' <i class="fa fa-camera" aria-hidden="true"></i>'; //icono.. 
+            button.className = 'btn btn-danger btn-sm ml-2'; 
+            button.setAttribute('id','BFOTO'+ listado[0][index]['nro']); //asigar id al boton para luego agregar el evento click.. 
+            document.getElementById('NRO'+ listado[0][index]['nro'] ).append( button ); //se agrega el boton a la linea... 
+            document.getElementById('BFOTO'+ listado[0][index]['nro'] ).addEventListener('click',()=>{ //se agrega el evento ... 
+              //alert('foto de la ot nro ' + listado[0][index]['ot'] );
+              this.linkCM(listado[0][index]['ot'])
+            }); 
+
+            /* area de volver a la solicitud para consultar o modificar  */
+            button = document.createElement('button'); //creamos un buton para ver el detalle.. 
+            button.innerHTML= ' <i class="fa fa-bookmark" aria-hidden="true"></i>'; //icono.. 
+            button.className = 'btn btn-warning btn-sm ml-2'; 
+            button.setAttribute('id','BTEXT'+ listado[0][index]['nro']); //asigar id al boton para luego agregar el evento click.. 
+            document.getElementById('NRO'+ listado[0][index]['nro'] ).append( button ); //se agrega el boton a la linea... 
+            document.getElementById('BTEXT'+ listado[0][index]['nro'] ).addEventListener('click',()=>{ //se agrega el evento ... 
+              //alert('detalle de la solicitud ' + listado[0][index]['ot'] );
+              this.detalleSolicitud(listado[0][index]['ot'],listado[0][index]['vin'] );
+            }); 
+            
+
+
             /* area de Log  */
             button = document.createElement('button'); //creamos un buton para ver el detalle.. 
             button.innerHTML= '</strong> <i class="fa fa-clock" aria-hidden="true"></i>'; //icono.. 
@@ -583,7 +607,7 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
           '<tr>'+ 
             '<td>' + data['rows'][index]['fecha'] +'</td>' +
             '<td>' + data['rows'][index]['area'] +'</td>' +
-            '<td>' + data['rows'][index]['estado'] +'</td>' +
+            '<td>' + data['rows'][index]['estado'] +'</td>' + 
             '<td>' + data['rows'][index]['motivo'] +'</td>' +
             '<td>' + data['rows'][index]['usuario'] +'</td>' +
           '</tr>'; 
@@ -617,6 +641,485 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
       swal.fire('error al grabar detalle.. ' + err , '', 'error' ); 
     });  
   }
+
+async detalleSolicitud(ot, vin ){
+
+  //recuperamos datos de repuestos entregados 
+  let res = await fetch(`${URL}/garantia-repuesto/${ot}`)
+  let repuesto = await res.json()
+  console.log(repuesto)
+
+  //recuperamos datos de los service
+  res = await fetch(`${URL}/garantia-servicios?vin=${vin}`)
+  let servicios = await res.json()
+  console.log(servicios)
+  
+
+  await fetch(`${URL}/garantia-solicitudes?ot=${ot}&usuario=admin&area=ADMINISTRADOR`)
+        .then(response => response.json())
+        .then(res => {console.log(res)
+        
+          let plantilla = `
+            <style type="text/css">
+            *{
+                margin:0;
+                padding: 0;
+            }
+  
+            .container{
+                display: grid;
+                grid-template-columns: 1fr;
+                /*grid-template-rows: 30px 0px 150px 550px 600px 150px;*/
+                grid-template-rows: 30px 0px 150px auto auto  130px;                                
+                grid-gap: 5px;
+                height: 99%;
+                width: 100%;
+                border-radius:5px;
+                font-size: 12px;
+                margin:auto;
+            }
+  
+            .titulo{
+                text-align: center; 
+                /* border-bottom: 1px solid #8b8b8b; */
+            }
+  
+            .titulo2{
+                text-align: center; 
+            }
+            
+            .box1{ 
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                /* border: 1px solid #8b8b8b; */
+            }
+            .box1 .b1-col1, 
+            .box1 .b1-col2{ 
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 1px solid #8b8b8b;
+            } 
+  
+            .box2{ 
+                display: grid;
+                grid-template-columns: 1fr;
+                border: 1px solid #8b8b8b;
+                border-radius: 5px;
+            }
+  
+            .box2 .b2-row1{
+                padding-left: 10px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+            }
+  
+            .box2 .b2-row2{ 
+                display: grid;
+                grid-template-columns: 0.3fr 0.5fr 0.3fr 1fr;
+                border-bottom: 1px solid #8b8b8b;        
+            }
+  
+            .b2-row2 * {
+                display: flex;
+                align-items: center;
+            }
+            
+            .b2-row2-col{
+                border-right: 1px solid #8b8b8b;
+                padding-left: 5px;
+            }
+            .b2-row2-col:nth-child(odd){
+              font-weight:bold;
+              background-color:#f4f4f5;
+            }
+  
+            .box3{ 
+                display: grid;
+                grid-template-columns: 0.5fr 0.3fr 1fr 1fr 1fr;
+                border: 1px solid #8b8b8b;
+                border-radius: 5px;
+            }
+  
+            .box3 .b3-row1-col1{
+                padding-left:5px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                grid-column: span 1;
+                background-color:#f4f4f5;
+                border-right: 1px solid #8b8b8b;                
+                border-left: 1px solid #8b8b8b;                
+            }
+
+            .box3 .b3-row1-col2{
+                padding-left:5px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                grid-column: span 4;
+                border-right: 1px solid #8b8b8b;                
+            }
+
+            .box3 .b3-row1-t{
+                padding-left: 5px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                grid-column: span 5;
+                font-weight:bold;
+            }
+  
+            .box3 .b3-row2{ 
+                display: flex;
+                align-items: center;
+                justify-content: left;
+                border-bottom: 1px solid #8b8b8b; 
+                border-left: 1px solid #8b8b8b; 
+                padding-left:5px;
+            }
+            .title-detail{
+              background-color:#f4f4f5;
+              font-weight:bold;
+            }
+  
+  
+            .box4{ 
+                display: grid;
+                /*grid-template-columns: 0.2fr 0.4fr 1.5fr 0.1fr 0.2fr 0.7fr;*/
+                grid-template-columns: 0.2fr auto auto 0.1fr 0.2fr auto;
+                /* border-bottom: 1px solid #8b8b8b; */
+                border: 1px solid #8b8b8b;
+                border-radius: 5px;
+            }
+  
+            .box4 .b4-row1{
+                padding-left: 10px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                grid-column: span 6;
+            }
+            .box4 .b4-row1-t{
+                padding-left: 10px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                grid-column: span 6;
+                font-weight:bold;
+            }
+  
+            .box4 .b4-row2{ 
+                padding-left: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: left;
+                border-bottom: 1px solid #8b8b8b; 
+                border-left: 1px solid #8b8b8b; 
+            }
+  
+            .box5{ 
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                border: 1px solid #8b8b8b;
+                border-radius: 5px;
+            }
+  
+            .box5 .b5-row1{
+                padding-left: 10px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                grid-column: span 4;
+            }
+            .box5 .b5-row1-t{
+                padding-left: 10px;
+                border-bottom: 1px solid #8b8b8b;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                grid-column: span 4;
+                font-weight:bold;
+            }
+  
+            .box5 .b5-row2{ 
+                padding-left: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 1px solid #8b8b8b; 
+                border-left: 1px solid #8b8b8b; 
+            }
+
+            @media print {
+              *:not(h2):not(#ot2) {font-size:10px;} 
+            }            
+
+          </style>
+  
+          <div class="container">
+          <!-- titulo --> 
+          <div class="titulo">
+              <h2 class="title">SOLICITUD GARANTIA OT #</h2>
+          </div>
+          
+          <!-- cabecera 1 --> 
+          <div class="box1">
+          </div>
+  
+          <!-- cabecera 2 --> 
+          <div class="box2">
+
+              <div class="b2-row2">
+                  <div class="b2-row2-col">FECHA RECEPCION: </div><div class="b2-row2-col" id="so-FOt"> </div> 
+                  <div class="b2-row2-col">AREA: </div><div class="b2-row2-col" id="so-area"> </div> 
+
+              </div>
+              
+              <div class="b2-row2">
+                <div class="b2-row2-col">FECHA SOLICITUD: </div><div class="b2-row2-col" id="so-FSolicitud"> </div> 
+                <div class="b2-row2-col">ESTADO: </div><div class="b2-row2-col" id="so-estado"> </div>
+              </div>
+  
+              <div class="b2-row2">
+                <div class="b2-row2-col">FECHA VENTA: </div><div class="b2-row2-col" id="so-FVenta"> </div>
+                <div class="b2-row2-col">CLIENTE: </div><div class="b2-row2-col" id="so-cliente"> </div>
+              </div>
+  
+              <div class="b2-row2">
+                  <div class="b2-row2-col">VIN: </div><div class="b2-row2-col" id="so-vin"> </div> 
+                  <div class="b2-row2-col">MODELO: </div><div class="b2-row2-col" id="so-modelo"> </div>
+              </div>
+  
+              <div class="b2-row2">
+                  <div class="b2-row2-col">KM. ENTRADA: </div><div class="b2-row2-col" id="so-u_kmentrada"> </div> 
+                  <div class="b2-row2-col">KM. SALIDA: </div><div class="b2-row2-col" id="so-u_kmsalida"> </div>
+              </div>
+  
+              <div class="b2-row2">
+                  <div class="b2-row2-col">VDN: </div><div class="b2-row2-col" id="so-vdn"> </div> 
+                  <div class="b2-row2-col">TIPO GARANTIA: </div><div class="b2-row2-col" id="so-tipoGarantia"> </div>
+              </div>
+  
+              <div class="b2-row2">
+                  <div class="b2-row2-col">JEFE GRUPO: </div><div class="b2-row2-col" id="so-nombreJefeGrupo"> </div> 
+                  <div class="b2-row2-col">MECANICO: </div><div class="b2-row2-col" id="so-mecanico"> </div>
+              </div>
+  
+  
+          </div>
+  
+  
+          <!-- detalle 1 -->
+          <div class="box3">
+              <div class="b3-row1-t title-detail">DETALLE SOLICITUD</div>
+              <div class="b3-row1-col1"><strong>SINTOMA CLIENTE:</strong></div> <div class="b3-row1-col2" id="so-pedido"></div>
+              <div class="b3-row1-col1"><strong>SINTOMA TECNICO:</strong></div> <div class="b3-row1-col2" id="so-sintoma"></div>
+
+              <!--cabecera detalle-->
+              <div class="b3-row2 title-detail">INCIDENTE</div>
+              <div class="b3-row2 title-detail">PIEZA CAUSAL</div>
+              <div class="b3-row2 title-detail">PIEZAS SOLICITADAS</div>
+              <div class="b3-row2 title-detail">DIAGNOSTICO TECNICO</div>
+              <div class="b3-row2 title-detail">REPARACION</div>
+  
+              <!--datos  col1 / col2  aqui va los detalles -->
+
+
+          </div>
+          <!-- detalle 2 -->
+          <div class="box4">
+              <div class="b4-row1-t title-detail">DETALLE REPUESTOS</div>
+  
+              <!--cabecera detalle-->
+              <div class="b4-row2 title-detail">REMISION</div>
+              <div class="b4-row2 title-detail">CODIGO</div>
+              <div class="b4-row2 title-detail">ARTICULO</div>
+              <div class="b4-row2 title-detail">CANT.</div>
+              <div class="b4-row2 title-detail">FECHA</div>
+              <div class="b4-row2 title-detail">MECANICO</div>
+  
+              <!--datos  6 COL fila 1 -->
+              <!-- 
+              <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+              <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+              -->
+              
+          </div>
+  
+          <!-- detalle 2 -->
+          <div class="box5">
+              <div class="b5-row1-t title-detail">DETALLE MANTENIMIENTOS</div>
+  
+              <!--cabecera detalle-->
+              <div class="b5-row2 title-detail">ITEM</div>
+              <div class="b5-row2 title-detail">FECHA</div>
+              <div class="b5-row2 title-detail">SERVICE</div>
+              <div class="b5-row2 title-detail">KM</div>
+              
+              <!--datos  4 COL fila 1 -->
+              <!-- <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
+              <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div> -->
+
+          </div>
+        </div>
+        <div class="boxButtons">
+          <button type="button" id="printSolicitud" onclick="imprimir()" class="btn btn-primary mt-3">Imprimir</button>
+          <button type="button" id="closePreview"class="btn btn-warning mt-3 text-center">Salir&nbsp;&nbsp;&nbsp;</button>
+        </div>
+          `      
+
+            swal.fire({
+              html: plantilla, 
+              width: '100%',
+              showCloseButton: true,
+              showConfirmButton: false,
+              //run after show popup 
+              didOpen:()=>{
+                //recorremos la fila 
+                res.rows.forEach(item=> {
+                  Object.entries(item).map(item=> {
+                    //insertamos datos en la cabecera box2
+                    if(item[0] === 'ot'){
+                      $(`.title`).text( 'SOLICITUD GARANTIA OT #' + String(item[1]).toUpperCase() )  
+
+                    }else{
+                      $(` #so-${item[0]}`).text( String(item[1]).toUpperCase() )  
+                    }
+                  })
+
+                  //insertamos datos en el detalle solicitud box3 
+                  $(`.box3`).append(`<div class="b3-row2">${item.incidente}</div> <div class="b3-row2">${item.piezaCausal}</div> <div class="b3-row2">${item.repuesto}</div> <div class="b3-row2">${item.motivo}</div> <div class="b3-row2">${item.reparacion}</div>`)  
+                  //$(` #ot2`).text( "#"+ $("#so-ot").text() )
+                })
+                //agregamos los detalles faltantes 
+                if(res.rows.length < 20){
+                  let detalle1 = new Array(20 - res.rows.length).fill('<div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>\n',0)
+                  detalle1.map(item=> $(`.box3`).append(item))
+                }
+
+                //detalle repuesto... 
+                repuesto.remision.map(item=>{
+                  $(`.box4`).append(`<div class="b4-row2">${item.REMISION}</div> <div class="b4-row2">${item.CODIGO}</div> <div class="b4-row2">${item.ARTICULO}</div>
+                  <div class="b4-row2">${item.CANTIDAD}</div> <div class="b4-row2">${item.fecha}</div> <div class="b4-row2">${item.firmado}</div>\n `)  
+                })
+
+                if(repuesto.remision.length < 20){
+                  let detalle2 = new Array(20 - repuesto.remision.length).fill( `
+                  <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+                  <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>\n `)
+                  detalle2.map(item=> $(`.box4`).append(item))
+                }
+
+                //detalle de mantenimiento... 
+                servicios.rows.map(item=>{
+                  $(`.box5`).append( `<div class="b5-row2">${item.fila}</div><div class="b5-row2">${item.fecha}</div><div class="b5-row2">${item.servicio}</div><div class="b5-row2">${item.km}</div>`)
+                })
+                
+                let detalle3 = new Array(5 - servicios.rows.length).fill( `<div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div>\n `)
+                detalle3.map(item=> $(`.box5`).append(item))
+                //agregamos el evento imprimir al boton 
+                document.getElementById('printSolicitud').addEventListener('click', () => { this.imprimir() });
+                document.getElementById('closePreview').addEventListener('click', () => { swal.close() });
+              }
+            })
+        })
+}
+
+imprimir(){
+  alert('imprimir..')
+  $(".boxButtons").css('display', 'none') 
+  let html="<html>";
+  html+= document.getElementById("swal2-content").innerHTML;
+  console.log(html)
+  html+="</html>";
+  let printWin = window.open('','','left=0,top=0,width=auto,height=auto,toolbar=0,scrollbars=0,status  =0');
+  printWin.document.write(html);
+  printWin.document.close();
+  printWin.focus();
+  printWin.print();
+  //printWin.close();  
+  $(".boxButtons").css('display', 'block') 
+
+}
+
+
+async linkCM(ot){
+  // Solicitud GET (Request).
+  await fetch(URL +`/garantia-fotos/${ot}` )
+  // Exito
+  .then(response => response.json())  // convertir a json
+  .then(json =>{
+    console.log(json)
+    if(json.length > 0){
+        let imagenes = '' ,indicador=''
+        json.forEach((item, x)=>{
+          //imagenes += ` <a class="" href="${item}" download="${$("#ot").val()+'_'+x}.jpg" ><img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="70" height="70" data-toggle="tooltip" data-placement="top" title="click descarga individual"></a> \n`
+          if(item.includes('videos')){
+            imagenes += `<video width="320" height="240" id="foto-${x}" controls> <source src="${item }" type="video/mp4"> </video> \n`
+
+          }else{
+            imagenes += ` <img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
+          }
+
+        })
+        console.log(imagenes)
+        console.log(indicador)
+        let pantalla = `
+        <div class="flex justify-content-start" id="myfotos">
+          ${imagenes}
+        </div>
+        <div class="container-fluid" id="fotoGrande">
+        
+        </div>
+        <div class="flex justify-content-end">
+          <button type="button" id="bDescargar" class="btn btn-sm btn-info mt-4">Descargar todo</button>
+        </div>
+        `
+      swal.fire({
+        title: `<strong><u>Fotos (${json.length })</u></strong>`,
+        showCloseButton: true,
+        showConfirmButton: false,
+        html: pantalla,
+        width: '100%',
+      })
+      .then(e =>{
+  
+      });
+
+        document.getElementById("bDescargar").addEventListener("click", async ()=>{
+
+          $( "#bDescargar" ).addClass( "progress-bar progress-bar-striped progress-bar-animated mx-auto" )
+          $( "#bDescargar" ).html( "<b>Descargando...</b>" )
+          await fetch(URL + `/garantia-descargar-fotos/${ot}`)
+          .then(response => response.blob())
+          .then(blob => {
+              var url = window.URL.createObjectURL(blob);
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = `${ot}.zip`;
+              document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+              a.click();
+              a.remove();  //afterwards we remove the element again
+              $( "#bDescargar" ).removeClass( "progress-bar progress-bar-striped progress-bar-animated mx-auto" )
+              $( "#bDescargar" ).html( "Descargar todo" )                
+
+          });
+
+       }); 
+    }else{
+      swal.fire('No tiene fotos asignados!')
+    }
+
+  })    //imprimir los datos en la consola
+  .catch(err => console.log('Solicitud fallida', err)); // Capturar errores    
+
+}
+
 
 async  subAprobar(area, solicitud, estado, operario, ot ){
     //datos base para la aprobacion... 

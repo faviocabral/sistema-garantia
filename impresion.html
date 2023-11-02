@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<style type="text/css">
+    *{
+        margin:0;
+        padding: 0;
+    }
+    html, body{
+        height: 100%;
+        width: 100%;
+    }
+    body{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .container{
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 30px 0px 150px 350px 350px 150px;
+        /* background-color: #5fad93; */
+        grid-gap: 5px;
+        height: 99%;
+        width: 99%;
+        /* border: 1px solid #8b8b8b; */
+        border-radius:5px;
+        font-size: 11px;
+    }
+
+    .titulo{
+        text-align: center; 
+        /* border-bottom: 1px solid #8b8b8b; */
+    }
+
+    .titulo2{
+        text-align: center; 
+    }
+    
+    .box1{ 
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /* border: 1px solid #8b8b8b; */
+    }
+    .box1 .b1-col1, 
+    .box1 .b1-col2{ 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid #8b8b8b;
+    } 
+
+    .box2{ 
+        display: grid;
+        grid-template-columns: 1fr;
+        border: 1px solid #8b8b8b;
+        border-radius: 5px;
+    }
+
+    .box2 .b2-row1{
+        padding-left: 10px;
+        border-bottom: 1px solid #8b8b8b;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .box2 .b2-row2{ 
+        padding-left: 10px;
+        display: grid;
+        grid-template-columns: 0.5fr 1fr 0.7fr 1fr;
+        border-bottom: 1px solid #8b8b8b;        
+    }
+
+    .b2-row2 * {
+        display: flex;
+        align-items: center;
+    }
+    
+    .b2-row2-col{
+        border-right: 1px solid #8b8b8b;
+        padding-left: 5px;
+    }
+
+    .box3{ 
+        display: grid;
+        grid-template-columns: 0.2fr 1fr 1fr 1fr;
+        /* border-bottom: 1px solid #8b8b8b; */
+        border: 1px solid #8b8b8b;
+        border-radius: 5px;
+    }
+
+    .box3 .b3-row1{
+        padding-left: 10px;
+        border-bottom: 1px solid #8b8b8b;
+        display: flex;
+        align-items: center;
+        grid-column: span 4;
+    }
+
+    .box3 .b3-row1-t{
+        padding-left: 10px;
+        border-bottom: 1px solid #8b8b8b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        grid-column: span 4;
+        height: 30px;
+    }
+
+    .box3 .b3-row2{ 
+        padding-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid #8b8b8b; 
+        border-left: 1px solid #8b8b8b; 
+    }
+
+
+    .box4{ 
+        display: grid;
+        grid-template-columns: 0.3fr 0.3fr 1fr 0.1fr 0.3fr 0.7fr;
+        /* border-bottom: 1px solid #8b8b8b; */
+        border: 1px solid #8b8b8b;
+        border-radius: 5px;
+    }
+
+    .box4 .b4-row1{
+        padding-left: 10px;
+        border-bottom: 1px solid #8b8b8b;
+        display: flex;
+        align-items: center;
+        grid-column: span 6;
+    }
+    .box4 .b4-row1-t{
+        padding-left: 10px;
+        border-bottom: 1px solid #8b8b8b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        grid-column: span 6;
+    }
+
+    .box4 .b4-row2{ 
+        padding-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid #8b8b8b; 
+        border-left: 1px solid #8b8b8b; 
+    }
+
+    .box5{ 
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        border: 1px solid #8b8b8b;
+        border-radius: 5px;
+    }
+
+    .box5 .b5-row1{
+        padding-left: 10px;
+        border-bottom: 1px solid #8b8b8b;
+        display: flex;
+        align-items: center;
+        grid-column: span 4;
+    }
+    .box5 .b5-row1-t{
+        padding-left: 10px;
+        border-bottom: 1px solid #8b8b8b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        grid-column: span 4;
+    }
+
+    .box5 .b5-row2{ 
+        padding-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid #8b8b8b; 
+        border-left: 1px solid #8b8b8b; 
+    }
+
+
+    
+</style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- titulo --> 
+        <div class="titulo">
+            <h2 class="title">SOLICITUD GARANTIA</h2>
+        </div>
+        
+        <!-- cabecera 1 --> 
+        <div class="box1">
+        </div>
+
+        <!-- cabecera 2 --> 
+        <div class="box2">
+            <div class="b2-row1">
+                <div class="b2-col1">Fecha Recepcion: </div>
+                <div class="b2-col2">Fecha de Venta: </div>
+    
+            </div>
+
+            <div class="b2-row2">
+                <div class="b2-row2-col">AREA: </div><div class="b2-row2-col"> </div> 
+                <div class="b2-row2-col">ESTADO: </div><div class="b2-row2-col"> </div>
+            </div>
+
+            <div class="b2-row2">
+                <div class="b2-row2-col">NRO OT: </div><div class="b2-row2-col"> </div> 
+                <div class="b2-row2-col">CLIENTE: </div><div class="b2-row2-col"> </div>
+            </div>
+
+            <div class="b2-row2">
+                <div class="b2-row2-col">VIN: </div><div class="b2-row2-col"> </div> 
+                <div class="b2-row2-col">MODELO: </div><div class="b2-row2-col"> </div>
+            </div>
+
+            <div class="b2-row2">
+                <div class="b2-row2-col">AÑO: </div><div class="b2-row2-col"> </div> 
+                <div class="b2-row2-col">KILOMETRAJE: </div><div class="b2-row2-col"> </div>
+            </div>
+
+            <div class="b2-row2">
+                <div class="b2-row2-col">VDN: </div><div class="b2-row2-col"> </div> 
+                <div class="b2-row2-col">TIPO GARANTIA: </div><div class="b2-row2-col"> </div>
+            </div>
+
+            <div class="b2-row2">
+                <div class="b2-row2-col">JEFE GRUPO: </div><div class="b2-row2-col"> </div> 
+                <div class="b2-row2-col">MECANICO: </div><div class="b2-row2-col"> </div>
+            </div>
+
+
+        </div>
+
+
+        <!-- detalle 1 -->
+        <div class="box3">
+            <div class="b3-row1-t">DETALLE SOLICITUD</div>
+            <div class="b3-row1">SINTOMA CLIENTE: </div>
+            <div class="b3-row1">SINTOMA TECNICO: </div>
+
+            <!--cabecera detalle-->
+            <div class="b3-row2">INCIDENTE</div>
+            <div class="b3-row2">PIEZAS SOLICITADAS</div>
+            <div class="b3-row2">DIAGNOSTICO TECNICO</div>
+            <div class="b3-row2">REPARACION</div>
+
+            <!--datos  col1 / col2 -->
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+            <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>
+        </div>
+        <!-- detalle 2 -->
+        <div class="box4">
+            <div class="b4-row1-t">DETALLE REPUESTOS</div>
+
+            <!--cabecera detalle-->
+            <div class="b4-row2">REMISION</div>
+            <div class="b4-row2">CODIGO</div>
+            <div class="b4-row2">ARTICULO</div>
+            <div class="b4-row2">CANTIDAD</div>
+            <div class="b4-row2">FECHA</div>
+            <div class="b4-row2">MECANICO</div>
+
+            <!--datos  6 COL fila 1 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 1 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 1 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 1 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            
+            <!--datos  6 COL fila 2 -->
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+            
+        </div>
+
+        <!-- detalle 2 -->
+        <div class="box5">
+            <div class="b5-row1-t">DETALLE MANTENIMIENTOS</div>
+
+            <!--cabecera detalle-->
+            <div class="b5-row2">ITEM</div>
+            <div class="b5-row2">FECHA</div>
+            <div class="b5-row2">SERVICE</div>
+            <div class="b5-row2">KM</div>
+            
+            <!--datos  4 COL fila 1 -->
+            <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
+            <!--datos  4 COL fila 2 -->
+            <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
+            <!--datos  4 COL fila 3 -->
+            <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
+            <!--datos  4 COL fila 4 -->
+            <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
+        </div>
+
+    </div>
+    
+</body>
+</html>
