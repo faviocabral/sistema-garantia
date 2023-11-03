@@ -222,6 +222,7 @@
                     <tbody id="detServicioTercero">
                     </tbody>
                   </table>
+
                   <div class="d-flex justify-content-center mb-1 mt-1">
                     <button type="button" id="bInsertarServicioTercero"  (click)="insertarServicioTercero()" class="btn btn-primary ml-1 mb-1"
                     style=" border-radius:10px; display: none;">Insertar</button>
@@ -231,6 +232,58 @@
 
               </div>
             </div>
+
+            <hr />
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#campanha"> <strong>CAMPAÑAS</strong></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#garantias"> <strong>ULTIMAS GARANTIAS</strong> </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#mora"> <strong>MORA</strong> </a>
+              </li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane fade show active text-center" id="campanha">
+                <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-campanha">
+                  <thead>
+                    <tr>
+                      <th>Ot</th>
+                      <th>Estado</th>
+                      <th>Codigo</th>
+                      <th>Campaña</th>
+                    </tr>
+                  </thead>
+                  <tbody id="det-campanha">
+                  </tbody>
+                </table>
+                <span ><strong id="sin-campanha"></strong> </span>
+              </div>
+              <div class="tab-pane fade show text-center" id="garantias">
+                <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-garantia">
+                  <thead>
+                    <tr>
+                      <th>Ot</th>
+                      <th>Vehiculo</th>
+                      <th>Pedido</th>
+                      <th>Fecha</th>
+                    </tr>
+                  </thead>
+                  <tbody id="det-garantia">
+                  </tbody>
+                </table>
+                <span ><strong id="sin-campanha"></strong></span>
+
+              </div>
+              <div class="tab-pane fade text-center" id="mora" >
+                <span ><strong id="cliente-mora"></strong></span>
+              </div>
+
+            </div>
+
 
           </div>
         </div>
@@ -346,7 +399,7 @@
           <div class="col">
             <h4 class="bg-danger rounded"><i class="fa fa-database ml-1" aria-hidden="true"></i> MANO DE OBRA </h4>
 
-            <div class="row mb-2">
+            <div class="row mb-2" id="abm-mob">
               <div class="col-sm-2">
                 <input type="text" class="form-control" id="codigoMob"
                   placeholder="Codigo.." required>

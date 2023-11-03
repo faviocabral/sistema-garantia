@@ -111,6 +111,10 @@ ngOnDestroy(){
           }
 
           this.recuperarServiciosTerceros()
+          this.recuperarMob()
+          this.campanha()
+          this.clienteMora()
+          this.ultimasGarantias()
 
           //si tiene remision traer los datos... 
           await fetch(URL+`/garantia-repuesto/${ot}`)
@@ -208,7 +212,10 @@ ngOnDestroy(){
 
               if( ($("#area").val() == 'GARANTIA' && $("#estado").val() == 'APROBADO') || $("#area").val() == 'REPUESTO' ){
                 $("#bReapertura").css('visibility', 'visible');
-                $("#bCierre").css('visibility', 'visible');
+
+                if(localStorage.getItem('area') === 'GARANTIA' || localStorage.getItem('area') === 'ADMINISTRADOR'){
+                  $("#bCierre").css('visibility', 'visible');
+                }
               } 
 
               for (let index = 0; index < datos.length; index++) {
@@ -816,11 +823,62 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
   }
 
   async guardarMob(){
-    alert(JSON.stringify(G_listMob))
+    let datos = G_listMob.map(item=>{ delete(item.id)
+      return {...item, user_ins : localStorage.getItem('user') , ot: $("#ot").val()}
+    })
+    try {
+      await fetch(URL +`/garantia-mob`, {
+        method: "POST",
+        body: JSON.stringify(datos),
+        headers: {"Content-type": "application/json; charset=UTF-8"}
+      })
+      .then(async(x) => {
+
+        alert('Se grabo la mano de obra con exito!')
+        G_listMob = []
+        $("#detalleMob").empty()
+        this.recuperarMob()
+      })
+      .catch((e)=>{
+        alert("Ocurrio un Error al grabar los datos... ")
+        console.log('hubo un error al grabar mano de obra ' , e)
+      })
+      
+    } catch (error) {
+      console.log('hubo un error al grabar la mano de obra... ', error )      
+    }
   }
-  
-  
+    
+  async recuperarMob(){
+    try {
+
+      if(localStorage.getItem('area') !== 'GARANTIA' && localStorage.getItem('area') !== 'ADMINISTRADOR'){
+        $("#abm-mob").css('display', 'none');
+      } 
+
+      $("#bGuardarMob").css('display','none')
+      
+        await fetch(URL +`/garantia-mob/${$("#ot").val()}`)
+        .then(res => res.json())
+        .then(rows=>{
+          console.log(rows)
+          let detalleMob = rows.map((item,x)=> `<tr id='mob-${x+1}'> 
+            <td>${item.codigo}</td>
+            <td>${item.descripcion}</td>
+            <td>${item.cantidad}</td>
+            <td>${item.estado}</td>
+            <td class="pl-1 pr-1 text-center"></td>
+          </tr>` )
+          $("#detalleMob").append(detalleMob)
+
+        })
+      } catch (error) {
+      console.log('hubo un error al recuperar la mano de obra ', error )
+    }
+  }
+
   async agregarMob(){
+    if($("#codigoMob").val().length === 0 || $("#descripcionMob").val().length === 0 || $("#cantidadMob").val().length === 0){alert('Debe ingresar datos en los campos de codigo - descripcion - cantidad'); return } 
     let listMob = [] 
     listMob.push({codigo: $("#codigoMob").val() , descripcion: $("#descripcionMob").val(), cantidad: $("#cantidadMob").val(), estado: 'NUEVO' })
     let fila = $('#detalleMob').find('tr').length + 1
@@ -839,7 +897,7 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
       G_listMob = G_listMob.filter(item=> item.id !== 'mob-'+fila)
       console.log(G_listMob)
       document.getElementById('mob-'+fila).remove()
-      if (  $('#detalleMob').find('tr').length === 0 )  $("#bGuardarMob").css('display', 'none')
+      if (  G_listMob.length ===0 )  $("#bGuardarMob").css('display', 'none')
     })
 
 
@@ -857,6 +915,69 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
     $("#codigoMob").focus()
     $("#bGuardarMob").css('display', 'block')
     console.log('mano de obra ... ', G_listMob)
+}
+
+async campanha(){
+  try {
+   
+      await fetch(URL +`/garantia-campanha/${$("#vin").val()}`)
+      .then(res => res.json())
+      .then(rows=>{
+        if(rows.length === 0 ){ $("#sin-campanha").append(`SIN CAMPAÑAS...`); $("#table-campanha").css('display', 'none') }
+        let detalle = rows.map((item,x)=> `<tr id='mob-${x+1}'> 
+          <td>${item.OT}</td>
+          <td>${item.ESTADO}</td>
+          <td>${item.CODIGO}</td>
+          <td>${item.TRABAJO}</td>
+        </tr>` )
+        $("#det-campanha").append(detalle)
+      })
+    } catch (error) {
+    console.log('hubo un error al recuperar la mano de obra ', error )
+  }
+}
+
+async ultimasGarantias(){
+  try {
+
+    
+      await fetch(URL +`/garantia-ultima-garantia/${$("#vin").val()}`)
+      .then(res => res.json())
+      .then(rows=>{
+
+        if(rows.length === 0 ){ $("#sin-garantia").append(`SIN REGISTROS DE GARANTIAS...`); $("#table-garantia").css('display', 'none') }
+
+        let detalle = rows.map((item,x)=> `<tr id='mob-${x+1}'> 
+          <td>${item.ot}</td>
+          <td>${item.vehiculo}</td>
+          <td>${item.pedido}</td>
+          <td>${item.fecha}</td>
+        </tr>` )
+        $("#det-garantia").append(detalle)
+
+      })
+    } catch (error) {
+    console.log('hubo un error al recuperar la mano de obra ', error )
+  }
+}
+
+async clienteMora(){
+  try {
+      $("#cliente-mora").html('Recuperando datos mora...')
+      await fetch(URL +`/garantia-mora/${$("#vin").val()}`)
+      .then(res => res.json())
+      .then(rows=>{
+
+        if(rows.length === 0 ){
+          $("#cliente-mora").html('CLIENTE AL DIA !!')
+        } else{
+          $("#cliente-mora").html(`CLIENTE CON ${rows[0]['mora']} DIAS DE MORA`)
+        }
+
+      })
+    } catch (error) {
+    console.log('hubo un error al recuperar la mano de obra ', error )
+  }
 }
 
 

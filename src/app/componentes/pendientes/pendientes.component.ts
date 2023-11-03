@@ -653,6 +653,11 @@ async detalleSolicitud(ot, vin ){
   res = await fetch(`${URL}/garantia-servicios?vin=${vin}`)
   let servicios = await res.json()
   console.log(servicios)
+
+  //recuperamos datos de los service
+  res = await fetch(`${URL}/garantia-mob/${ot}`)
+  let mob = await res.json()
+  console.log(mob)
   
 
   await fetch(`${URL}/garantia-solicitudes?ot=${ot}&usuario=admin&area=ADMINISTRADOR`)
@@ -855,6 +860,31 @@ async detalleSolicitud(ot, vin ){
                 border-left: 1px solid #8b8b8b; 
             }
 
+            .box6{ 
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              border: 1px solid #8b8b8b;
+              border-radius: 5px;
+            }
+            .box6 .b6-row1{
+              padding-left: 10px;
+              border-bottom: 1px solid #8b8b8b;
+              display: flex;
+              align-items: center;
+              grid-column: span 3;
+              text-align:center;
+            }
+            .box6 .b6-row2{ 
+              padding-left: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-bottom: 1px solid #8b8b8b; 
+              border-left: 1px solid #8b8b8b; 
+            }
+
+
+
             @media print {
               *:not(h2):not(#ot2) {font-size:10px;} 
             }            
@@ -964,8 +994,23 @@ async detalleSolicitud(ot, vin ){
               <!--datos  4 COL fila 1 -->
               <!-- <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
               <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div> -->
-
           </div>
+
+          <!-- detalle 3 -->
+          <div class="box6">
+              <div class="b6-row1 title-detail">MANO DE OBRA</div>
+  
+              <!--cabecera detalle-->
+              <div class="b6-row2 title-detail">CODIGO</div>
+              <div class="b6-row2 title-detail">MANO DE OBRA</div>
+              <div class="b6-row2 title-detail">CANTIDAD</div>
+              
+              <!--datos  4 COL fila 1 -->
+              <!-- <div class="b6-row2"></div><div class="b6-row2"></div><div class="b6-row2"></div><div class="b5-row2"></div>
+              <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div> -->
+          </div>
+
+
         </div>
         <div class="boxButtons">
           <button type="button" id="printSolicitud" onclick="imprimir()" class="btn btn-primary mt-3">Imprimir</button>
@@ -1022,6 +1067,12 @@ async detalleSolicitud(ot, vin ){
                 
                 let detalle3 = new Array(5 - servicios.rows.length).fill( `<div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div>\n `)
                 detalle3.map(item=> $(`.box5`).append(item))
+
+                //detalle repuesto... 
+                mob.map(item=>{
+                  $(`.box6`).append(`<div class="b6-row2">${item.codigo}</div> <div class="b6-row2">${item.descripcion}</div> <div class="b6-row2">${item.cantidad}</div>\n `)  
+                })
+
                 //agregamos el evento imprimir al boton 
                 document.getElementById('printSolicitud').addEventListener('click', () => { this.imprimir() });
                 document.getElementById('closePreview').addEventListener('click', () => { swal.close() });
