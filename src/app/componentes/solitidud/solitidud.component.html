@@ -248,33 +248,36 @@
             </ul>
             <div class="tab-content">
               <div class="tab-pane fade show active text-center" id="campanha">
-                <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-campanha">
-                  <thead>
-                    <tr>
-                      <th>Ot</th>
-                      <th>Estado</th>
-                      <th>Codigo</th>
-                      <th>Campaña</th>
-                    </tr>
-                  </thead>
-                  <tbody id="det-campanha">
-                  </tbody>
-                </table>
+                <div class="table-responsive" style="border-radius: 5px;">
+                  <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-campanha">
+                    <thead>
+                      <tr>
+                        <th>Ot</th>
+                        <th>Estado</th>
+                        <th>Codigo</th>
+                        <th>Campaña</th>
+                      </tr>
+                    </thead>
+                    <tbody id="det-campanha">
+                    </tbody>
+                  </table>
+                </div>                
                 <span ><strong id="sin-campanha"></strong> </span>
               </div>
               <div class="tab-pane fade show text-center" id="garantias">
-                <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-garantia">
-                  <thead>
-                    <tr>
-                      <th>Ot</th>
-                      <th>Vehiculo</th>
-                      <th>Pedido</th>
-                      <th>Fecha</th>
-                    </tr>
-                  </thead>
-                  <tbody id="det-garantia">
-                  </tbody>
-                </table>
+                <div class="table-responsive" style="border-radius: 5px;">
+                  <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-garantia">
+                    <thead>
+                      <tr>
+                        <th>Ot</th>
+                        <th>Pedido</th>
+                        <th>Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody id="det-garantia">
+                    </tbody>
+                  </table>
+                </div>                
                 <span ><strong id="sin-campanha"></strong></span>
 
               </div>
@@ -304,6 +307,28 @@
               <input type="text" class="form-control text-uppercase" id="sintoma" name="sintoma" placeholder="Sintoma tecnico" required>
             </div>
           </div>
+        </div>
+
+        <div class="row mr-1 ml-1 rounded bg-light " style="margin-bottom:10px;">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> Fecha Cierre:</label>
+                <input type="date" class="form-control text-uppercase cierre-garantia" id="fechaCierre" name="fechaCierre" placeholder="Fecha Cierre" required>
+              </div>
+            </div>
+  
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> Kilometraje cierre:</label>
+                <input type="text" class="form-control text-uppercase cierre-garantia" id="kmCierre" name="kmCierre" placeholder="Km Cierre" required>
+              </div>
+            </div>
+            <div class="col-sm-12">
+              <button type="button" (click)="actualizarCierre()" class="btn btn-primary ml-1 cierre-garantia"
+                style="position: relative; float: right; border-radius:10px;">
+                Actualizar
+              </button>
+        </div>
         </div>
 
         <div class="row mr-1 ml-1">

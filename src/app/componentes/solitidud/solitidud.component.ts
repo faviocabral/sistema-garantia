@@ -62,12 +62,17 @@ ngOnDestroy(){
   recuperarSolicitud(){
     let ot = this.route.snapshot.paramMap.get('id');
     if (Number(ot) != 0) {
+      
+      if(localStorage.getItem('area') !== 'GARANTIA' && localStorage.getItem('area') !== 'ADMINISTRADOR' ){
+        $(".cierre-garantia").attr("disabled", 'disabled');
+      } 
+
       $("#bSolicitar").text("Actualizar")
       //this.notificacion.getToken();// trae el token que genero el usuario... 
       //this.notificacion.sendPush('Garantia', 'Nueva Solicitud de ' + String(ot) );
       //las notificaciones se van a enviar desde el servidor 
 
-       
+      //recupera datos de la ot y datos del vehiculo... 
       $.get(URL +"/garantia-solicitud?ot=" + ot, function (data, status) {
         console.log('estado de la consulta ', status);
       })
@@ -202,12 +207,16 @@ ngOnDestroy(){
               $("#mecanico").val(datos[0]['mecanico']);//se recupera de la primera fila .
               $("#jefeGrupo").val(datos[0]['nombreJefeGrupo']);//se recupera de la primera fila .
               $("#sintoma").val(datos[0]['sintoma']);//se recupera de la primera fila .
+              $("#fechaCierre").val(datos[0]['fechaCierre'].slice(0,10));//se recupera de la primera fila .
+              $("#kmCierre").val(datos[0]['kmCierre']);//se recupera de la primera fila .
               //$("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
 
               $("#vdn").attr('readonly', true);
               $("#tipoGarantia").attr("disabled", true); 
               $("#mecanico").attr("disabled", true); 
               $("#sintoma").attr("disabled", true); 
+              ($("#kmCierre").val().trim().length > 0 )? $("#kmCierre").attr("disabled", true): ''; 
+              ($("#fechaCierre").val().trim().length > 0 )? $("#fechaCierre").attr("disabled", true): '';
               document.querySelector('#piezasSolicitadas').innerHTML = body;
 
               if( ($("#area").val() == 'GARANTIA' && $("#estado").val() == 'APROBADO') || $("#area").val() == 'REPUESTO' ){
@@ -628,6 +637,7 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
       .catch(err => console.log('Solicitud fallida', err)); // Capturar errores
 
       var valor = $("#form1").serializeArray();
+      console.log(valor)
       //agregar el usuario loggeado 
       valor.push({ name: 'usuario', value: localStorage.getItem('user') });
       //console.log('valores del array.. ');
@@ -923,19 +933,67 @@ async campanha(){
       await fetch(URL +`/garantia-campanha/${$("#vin").val()}`)
       .then(res => res.json())
       .then(rows=>{
-        if(rows.length === 0 ){ $("#sin-campanha").append(`SIN CAMPAÑAS...`); $("#table-campanha").css('display', 'none') }
+        if(rows.length === 0 ){ 
+          $("#sin-campanha").html(`SIN CAMPAÑAS...`); 
+          $("#table-campanha").css('display', 'none'); 
+          return  
+        }
         let detalle = rows.map((item,x)=> `<tr id='mob-${x+1}'> 
           <td>${item.OT}</td>
-          <td>${item.ESTADO}</td>
+          <td>${item.ESTADO.includes('COMPLETED') ? `<h5><span class="label bg-success rounded">${item.ESTADO}</span></h5>` : `<h5>Example <span class="label bg-danger rounded">${item.ESTADO}</span></h5>` }</td>
           <td>${item.CODIGO}</td>
           <td>${item.TRABAJO}</td>
         </tr>` )
-        $("#det-campanha").append(detalle)
+        $("#det-campanha").html(detalle)
+
+        let table = `
+        <div class="table-responsive" style="border-radius: 5px;">
+          <table class="table table-striped table-sm table-hover text-nowrap mb-3">
+            <thead>
+              <tr>
+                <th>Ot</th>
+                <th>Estado</th>
+                <th>Campaña</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${detalle}
+            </tbody>
+          </table>
+        </div>
+        `
+        swal.fire({
+          title: `<strong>CAMPAÑAS</strong>`,
+          showCloseButton: true,
+          showConfirmButton: false,
+          html: table ,
+          width: '100%',
+        })
+
       })
     } catch (error) {
     console.log('hubo un error al recuperar la mano de obra ', error )
   }
 }
+
+async actualizarCierre(){
+  if($("#fechaCierre").val().length === 0 && $("#kmCierre").val().length ===0 ){alert('Debe ingresar datos de Fecha Cierre y Km de Cierre'); return } 
+    await fetch(URL+'/garantia-upd-cab-new/' + $("#ot").val() , {
+      method: "POST",
+      body: JSON.stringify({fechaCierre: $("#fechaCierre").val().replaceAll('-', '') , kmCierre: $("#kmCierre").val() }),
+      headers: {"Content-type": "application/json; charset=UTF-8"}
+    })
+    .then(json => {
+      alert('Datos modificados correctamente !!!')
+      window.location.reload()
+    })
+    .catch(err => {console.log(err)
+      alert('hubo un error en la actualizacion !!')
+    })
+
+}
+
 
 async ultimasGarantias(){
   try {
@@ -949,11 +1007,10 @@ async ultimasGarantias(){
 
         let detalle = rows.map((item,x)=> `<tr id='mob-${x+1}'> 
           <td>${item.ot}</td>
-          <td>${item.vehiculo}</td>
           <td>${item.pedido}</td>
           <td>${item.fecha}</td>
         </tr>` )
-        $("#det-garantia").append(detalle)
+        $("#det-garantia").html(detalle)
 
       })
     } catch (error) {
@@ -971,7 +1028,15 @@ async clienteMora(){
         if(rows.length === 0 ){
           $("#cliente-mora").html('CLIENTE AL DIA !!')
         } else{
-          $("#cliente-mora").html(`CLIENTE CON ${rows[0]['mora']} DIAS DE MORA`)
+
+          swal.fire({
+            title: `<strong>Estado de Cliente</strong>`,
+            showCloseButton: true,
+            showConfirmButton: false,
+            html: ` <h3><span class="badge bg-danger"> CLIENTE CON ${rows[0]['mora']} DIAS DE MORA</span></h3>  `,
+          })
+
+          $("#cliente-mora").html(`<h5><span class="badge bg-danger"> CLIENTE CON ${rows[0]['mora']} DIAS DE MORA</span></h5>`)
         }
 
       })
@@ -996,13 +1061,21 @@ async clienteMora(){
               imagenes += `<video width="320" height="240" id="foto-${x}" controls> <source src="${item }" type="video/mp4"> </video> \n`
 
             }else{
-              imagenes += ` <img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
+              imagenes += ` <img class="img-fluid rounded" onClick="this.classList.toggle('zoom-img')" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
             }
 
           })
           console.log(imagenes)
           console.log(indicador)
           let pantalla = `
+            <style>
+            .zoom-img {
+              z-index: 100;
+              position:relative;
+              height: auto;
+              width: auto;
+            }
+            </style>          
           <div class="flex justify-content-start" id="myfotos">
             ${imagenes}
           </div>

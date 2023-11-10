@@ -906,13 +906,13 @@ async detalleSolicitud(ot, vin ){
 
               <div class="b2-row2">
                   <div class="b2-row2-col">FECHA RECEPCION: </div><div class="b2-row2-col" id="so-FOt"> </div> 
-                  <div class="b2-row2-col">AREA: </div><div class="b2-row2-col" id="so-area"> </div> 
+                  <div class="b2-row2-col">FECHA CIERRE: </div><div class="b2-row2-col" id="so-fechaCierre"> </div> 
 
               </div>
               
               <div class="b2-row2">
                 <div class="b2-row2-col">FECHA SOLICITUD: </div><div class="b2-row2-col" id="so-FSolicitud"> </div> 
-                <div class="b2-row2-col">ESTADO: </div><div class="b2-row2-col" id="so-estado"> </div>
+                <div class="b2-row2-col">KM CIERRE: </div><div class="b2-row2-col" id="so-kmCierre"> </div>
               </div>
   
               <div class="b2-row2">
@@ -1032,6 +1032,8 @@ async detalleSolicitud(ot, vin ){
                     if(item[0] === 'ot'){
                       $(`.title`).text( 'SOLICITUD GARANTIA OT #' + String(item[1]).toUpperCase() )  
 
+                    }else if(item[0] === 'fechaCierre'){
+                      $(` #so-${item[0]}`).text( String(item[1]).slice(0 , 10 ) )  
                     }else{
                       $(` #so-${item[0]}`).text( String(item[1]).toUpperCase() )  
                     }
@@ -1114,13 +1116,21 @@ async linkCM(ot){
             imagenes += `<video width="320" height="240" id="foto-${x}" controls> <source src="${item }" type="video/mp4"> </video> \n`
 
           }else{
-            imagenes += ` <img class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
+            imagenes += `<img onClick="this.classList.toggle('zoom-img')" class="img-fluid rounded" id="foto-${x}" src="${item}" alt="" width="200" height="200" data-toggle="tooltip" data-placement="top" title=""> \n`
           }
 
         })
         console.log(imagenes)
         console.log(indicador)
         let pantalla = `
+        <style>
+          .zoom-img {
+            z-index: 100;
+            position:relative;
+            height: auto;
+            width: auto;
+          }
+        </style>
         <div class="flex justify-content-start" id="myfotos">
           ${imagenes}
         </div>
@@ -1139,7 +1149,6 @@ async linkCM(ot){
         width: '100%',
       })
       .then(e =>{
-  
       });
 
         document.getElementById("bDescargar").addEventListener("click", async ()=>{
