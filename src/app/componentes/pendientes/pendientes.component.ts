@@ -907,11 +907,10 @@ async detalleSolicitud(ot, vin ){
               <div class="b2-row2">
                   <div class="b2-row2-col">FECHA RECEPCION: </div><div class="b2-row2-col" id="so-FOt"> </div> 
                   <div class="b2-row2-col">FECHA CIERRE: </div><div class="b2-row2-col" id="so-fechaCierre"> </div> 
-
               </div>
               
               <div class="b2-row2">
-                <div class="b2-row2-col">FECHA SOLICITUD: </div><div class="b2-row2-col" id="so-FSolicitud"> </div> 
+                <div class="b2-row2-col">KM ENTRADA: </div><div class="b2-row2-col" id="so-u_kmentrada"> </div> 
                 <div class="b2-row2-col">KM CIERRE: </div><div class="b2-row2-col" id="so-kmCierre"> </div>
               </div>
   
@@ -923,11 +922,6 @@ async detalleSolicitud(ot, vin ){
               <div class="b2-row2">
                   <div class="b2-row2-col">VIN: </div><div class="b2-row2-col" id="so-vin"> </div> 
                   <div class="b2-row2-col">MODELO: </div><div class="b2-row2-col" id="so-modelo"> </div>
-              </div>
-  
-              <div class="b2-row2">
-                  <div class="b2-row2-col">KM. ENTRADA: </div><div class="b2-row2-col" id="so-u_kmentrada"> </div> 
-                  <div class="b2-row2-col">KM. SALIDA: </div><div class="b2-row2-col" id="so-u_kmsalida"> </div>
               </div>
   
               <div class="b2-row2">
@@ -1030,12 +1024,12 @@ async detalleSolicitud(ot, vin ){
                   Object.entries(item).map(item=> {
                     //insertamos datos en la cabecera box2
                     if(item[0] === 'ot'){
-                      $(`.title`).text( 'SOLICITUD GARANTIA OT #' + String(item[1]).toUpperCase() )  
+                      $(`.title`).text( 'SOLICITUD GARANTIA OT #' + String(item[1] || '').toUpperCase() )  
 
                     }else if(item[0] === 'fechaCierre'){
-                      $(` #so-${item[0]}`).text( String(item[1]).slice(0 , 10 ) )  
+                      $(` #so-${item[0]}`).text( String(item[1] || '').slice(0 , 10 ) )  
                     }else{
-                      $(` #so-${item[0]}`).text( String(item[1]).toUpperCase() )  
+                      $(` #so-${item[0]}`).text( String(item[1] || '').toUpperCase() )  
                     }
                   })
 

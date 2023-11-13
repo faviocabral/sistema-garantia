@@ -39,7 +39,7 @@ ngOnDestroy(){
    
      this.suscription = this.websocket.listen('refrescar-solicitud').subscribe((data: any) => {
      console.log('entro en el socket !!!!')
-          this.recuperarSolicitud()
+        this.recuperarSolicitud()
     })
 
     this.suscription2 = this.websocket.listen('solicitando2').subscribe((data: any) => {
@@ -207,10 +207,9 @@ ngOnDestroy(){
               $("#mecanico").val(datos[0]['mecanico']);//se recupera de la primera fila .
               $("#jefeGrupo").val(datos[0]['nombreJefeGrupo']);//se recupera de la primera fila .
               $("#sintoma").val(datos[0]['sintoma']);//se recupera de la primera fila .
-              $("#fechaCierre").val(datos[0]['fechaCierre'].slice(0,10));//se recupera de la primera fila .
+              $("#fechaCierre").val(String( datos[0]['fechaCierre']|| '').slice(0,10));//se recupera de la primera fila .
               $("#kmCierre").val(datos[0]['kmCierre']);//se recupera de la primera fila .
               //$("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
-
               $("#vdn").attr('readonly', true);
               $("#tipoGarantia").attr("disabled", true); 
               $("#mecanico").attr("disabled", true); 
