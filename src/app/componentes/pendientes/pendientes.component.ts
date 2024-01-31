@@ -829,7 +829,7 @@ async detalleSolicitud(ot, vin ){
   
             .box5{ 
                 display: grid;
-                grid-template-columns: 1fr 1fr 1fr 1fr;
+                grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
                 border: 1px solid #8b8b8b;
                 border-radius: 5px;
             }
@@ -847,7 +847,7 @@ async detalleSolicitud(ot, vin ){
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                grid-column: span 4;
+                grid-column: span 5;
                 font-weight:bold;
             }
   
@@ -869,7 +869,7 @@ async detalleSolicitud(ot, vin ){
             .box6 .b6-row1{
               padding-left: 10px;
               border-bottom: 1px solid #8b8b8b;
-              display: flex;
+              /*display: flex;*/
               align-items: center;
               grid-column: span 3;
               text-align:center;
@@ -984,6 +984,7 @@ async detalleSolicitud(ot, vin ){
               <div class="b5-row2 title-detail">FECHA</div>
               <div class="b5-row2 title-detail">SERVICE</div>
               <div class="b5-row2 title-detail">KM</div>
+              <div class="b5-row2 title-detail">TALLER</div>
               
               <!--datos  4 COL fila 1 -->
               <!-- <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
@@ -996,7 +997,7 @@ async detalleSolicitud(ot, vin ){
   
               <!--cabecera detalle-->
               <div class="b6-row2 title-detail">CODIGO</div>
-              <div class="b6-row2 title-detail">MANO DE OBRA</div>
+              <div class="b6-row2 title-detail">MOB</div>
               <div class="b6-row2 title-detail">CANTIDAD</div>
               
               <!--datos  4 COL fila 1 -->
@@ -1039,7 +1040,7 @@ async detalleSolicitud(ot, vin ){
                 })
                 //agregamos los detalles faltantes 
                 if(res.rows.length < 20){
-                  let detalle1 = new Array(20 - res.rows.length).fill('<div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>\n',0)
+                  let detalle1 = new Array(10 - res.rows.length).fill('<div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>\n',0)
                   detalle1.map(item=> $(`.box3`).append(item))
                 }
 
@@ -1050,7 +1051,7 @@ async detalleSolicitud(ot, vin ){
                 })
 
                 if(repuesto.remision.length < 20){
-                  let detalle2 = new Array(20 - repuesto.remision.length).fill( `
+                  let detalle2 = new Array(10 - repuesto.remision.length).fill( `
                   <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
                   <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>\n `)
                   detalle2.map(item=> $(`.box4`).append(item))
@@ -1058,7 +1059,7 @@ async detalleSolicitud(ot, vin ){
 
                 //detalle de mantenimiento... 
                 servicios.rows.map(item=>{
-                  $(`.box5`).append( `<div class="b5-row2">${item.fila}</div><div class="b5-row2">${item.fecha}</div><div class="b5-row2">${item.servicio}</div><div class="b5-row2">${item.km}</div>`)
+                  $(`.box5`).append( `<div class="b5-row2">${item.fila}</div><div class="b5-row2">${item.fecha}</div><div class="b5-row2">${item.servicio}</div><div class="b5-row2">${item.km}</div> <div class="b5-row2">${item.taller}</div> `)
                 })
                 
                 let detalle3 = new Array(5 - servicios.rows.length).fill( `<div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div>\n `)
@@ -1068,6 +1069,7 @@ async detalleSolicitud(ot, vin ){
                 mob.map(item=>{
                   $(`.box6`).append(`<div class="b6-row2">${item.codigo}</div> <div class="b6-row2">${item.descripcion}</div> <div class="b6-row2">${item.cantidad}</div>\n `)  
                 })
+                if(mob.length === 0) $(`.box6`).append(`<div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div>\n `)  
 
                 //agregamos el evento imprimir al boton 
                 document.getElementById('printSolicitud').addEventListener('click', () => { this.imprimir() });

@@ -237,17 +237,34 @@
             <!-- Nav tabs -->
             <ul class="nav nav-tabs mb-3">
               <li class="nav-item">
-                <a class="nav-link active" data-toggle="tab" href="#campanha"> <strong>CAMPAÑAS</strong></a>
+                <a class="nav-link active" data-toggle="tab" href="#garantias"> <strong>ULTIMAS GARANTIAS</strong> </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#garantias"> <strong>ULTIMAS GARANTIAS</strong> </a>
+                <a class="nav-link" data-toggle="tab" href="#campanha"> <strong>CAMPAÑAS</strong></a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#mora"> <strong>MORA</strong> </a>
               </li>
             </ul>
             <div class="tab-content">
-              <div class="tab-pane fade show active text-center" id="campanha">
+              <div class="tab-pane fade show active text-center" id="garantias">
+                <div class="table-responsive" style="border-radius: 5px;">
+                  <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-garantia">
+                    <thead>
+                      <tr>
+                        <th>Ot</th>
+                        <th>Pedido</th>
+                        <th>Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody id="det-garantia">
+                    </tbody>
+                  </table>
+                </div>                
+                <span ><strong id="sin-campanha"></strong></span>
+              </div>
+
+              <div class="tab-pane fade show  text-center" id="campanha">
                 <div class="table-responsive" style="border-radius: 5px;">
                   <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-campanha">
                     <thead>
@@ -263,23 +280,6 @@
                   </table>
                 </div>                
                 <span ><strong id="sin-campanha"></strong> </span>
-              </div>
-              <div class="tab-pane fade show text-center" id="garantias">
-                <div class="table-responsive" style="border-radius: 5px;">
-                  <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-garantia">
-                    <thead>
-                      <tr>
-                        <th>Ot</th>
-                        <th>Pedido</th>
-                        <th>Fecha</th>
-                      </tr>
-                    </thead>
-                    <tbody id="det-garantia">
-                    </tbody>
-                  </table>
-                </div>                
-                <span ><strong id="sin-campanha"></strong></span>
-
               </div>
               <div class="tab-pane fade text-center" id="mora" >
                 <span ><strong id="cliente-mora"></strong></span>
@@ -339,7 +339,7 @@
             <div class="row mb-2">
               <div class="col-sm-12" style="display: inline-flex;">
                 <input type="text" class="form-control" id="incidente"
-                  placeholder="ingrese el incidente" required>
+                  placeholder="ingrese el incidente(solo numeros)" (keypress)="keyPress($event)" required>
               </div>
               <div class="col-sm-6">
                 <input type="text" class="form-control" motivoReclamo="piezaSolicitada" id="piezaSolicitada"
@@ -399,6 +399,10 @@
             <!-- <button type="button" style="position: relative; float: right;" class="btn btn-warning mr-3"><i class="fa fa-print" aria-hidden="true"></i> Imprimir</button>-->
             <button type="button" id="bReapertura" class="btn btn-warning mr-3" (click)="reapertura()" style="position: relative; float: right; visibility:hidden;">Re-Apertura</button>
             <button type="button" id="bCierre" class="btn btn-danger mr-3" (click)="cierre()" style="position: relative; float: right; visibility:hidden;">Cierre</button>
+
+            <button type="button" id="bRechazar" class="btn btn-danger mr-3" (click)="accion('rechazar')" style="position: relative; float: left; ">Rechazar</button>
+            <button type="button" id="bEspera"   class="btn btn-warning mr-3"  (click)="accion('espera')" style="position: relative; float: left; ">Espera</button>
+            <button type="button" id="bAprobar"  class="btn btn-success mr-3" (click)="accion('aprobar')" style="position: relative; float: left; ">Aprobar</button>
     
           </div>
         </div>

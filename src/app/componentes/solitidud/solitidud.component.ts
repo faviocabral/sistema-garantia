@@ -253,8 +253,6 @@ ngOnDestroy(){
                 }
               }
 
-
-
               datos.forEach(item=>{
                 document.getElementById('det-'+item.idDet).addEventListener('dblclick', async(x) => {
                   if($("#estado").val() == 'RECHAZADO'){
@@ -315,6 +313,9 @@ ngOnDestroy(){
             }
           })
           .then(x=>{
+            //para controlar las aprobaciones para garantia...
+            this.aprobaciones()
+
             if($("#estado").val() !=="NUEVO"){
               $("#bSolicitar").text("Actualizar")
             }else{
@@ -331,6 +332,38 @@ ngOnDestroy(){
         });
 
     }
+    //controlar aprobaciones para garantia...
+    this.aprobaciones()
+  }
+
+  //funcion para realizar las aprobaciones de la solicitud 
+  aprobaciones(){
+     
+      //
+      if(localStorage.getItem('area') === 'GARANTIA' || localStorage.getItem('area') === 'ADMINISTRADOR'){
+
+        $("#bRechazar").css('visibility', 'visible')
+        $("#bEspera").css('visibility', 'visible')
+        $("#bAprobar").css('visibility', 'visible')
+
+      }else{
+        $("#bRechazar").css('visibility', 'hidden')
+        $("#bEspera").css('visibility', 'hidden')
+        $("#bAprobar").css('visibility', 'hidden')
+      }
+
+      //
+      if($("#area").val() === 'GARANTIA' && ( $("#estado").val() === 'PENDIENTE' || $("#estado").val() === 'ESPERA' ) ){
+
+        $('#bRechazar').prop('disabled', false);
+        $('#bEspera').prop('disabled', false);
+        $('#bAprobar').prop('disabled', false);
+      }else{
+        $('#bRechazar').prop('disabled', true);
+        $('#bEspera').prop('disabled', true);
+        $('#bAprobar').prop('disabled', true);
+      }
+    
   }
 
 
@@ -749,7 +782,6 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
       swal.fire('Solo hasta cuatro items se puede agregar en el listado !!!','','warning');
     }
 
-
     
   }
 
@@ -1115,9 +1147,7 @@ async clienteMora(){
 
             });
 
-
-
-         }); 
+        }); 
       }else{
         swal.fire('No tiene fotos asignados!')
       }
@@ -1125,6 +1155,155 @@ async clienteMora(){
     })    //imprimir los datos en la consola
     .catch(err => console.log('Solicitud fallida', err)); // Capturar errores    
 
+  }
+
+ 
+  keyPress(event: KeyboardEvent) {
+    const pattern = /[0-9]/;
+    const inputChar = String.fromCharCode(event.charCode);
+    if (!pattern.test(inputChar)) {
+        // invalid character, prevent input
+        event.preventDefault();
+    }
+  } 
+
+  async accion(evento:string){
+    if(evento === 'aprobar'){
+      await this.subAprobar('GARANTIA' , $("#id").val() , 'APROBADO', localStorage.getItem('user'), $("#ot").val())
+      window.location.reload()
+    }else if(evento === 'espera'){
+      await this.subAprobar('GARANTIA' , $("#id").val() , 'PENDIENTE', localStorage.getItem('user'), $("#ot").val())
+      window.location.reload()
+    }else if (evento === 'rechazar'){
+      await this.subAprobar( 'GARANTIA' , $("#id").val() , 'RECHAZADO', localStorage.getItem('user'), $("#ot").val())
+      window.location.reload()
+    }
+  }
+
+  async  subAprobar(area, solicitud, estado, operario, ot ){
+    //datos base para la aprobacion... 
+    var datos = [], usuario = ""; 
+    usuario = localStorage.getItem('user');
+
+    if(area === 'GARANTIA' && estado === 'PENDIENTE'){
+      area = 'TALLER'
+    }
+
+    datos.push( 
+      {name: 'id', value: solicitud }, 
+      {name: 'usuario', value: usuario }, 
+      {name: 'area', value: (area === 'TALLER' && estado === 'MODIFICADO'? 'GARANTIA' : area ) }, 
+      {name: 'estado', value: (area === 'TALLER' && estado === 'MODIFICADO'? 'PENDIENTE' : estado ) }, 
+    );
+
+      //si se modifico el detalle se agrega aqui... 
+      // var tbl = $("#TD"+ solicitud +" tr").has('td') , celda : any; 
+      // for (let index = 0; index < tbl.length; index++) {
+      //   //si el valor es diferente a la seleccion del usuario actualiza el detalle ... 
+      //   // el atributo valor es una variable que trae por defecto y podra comparar con innertext del item..
+      //   if($("#D" + solicitud + (index + 1)).text() != $("#D" + solicitud + (index + 1)).attr('valor') ){
+      //     datos.push({name: 'idDet', value: $("#D" + solicitud + (index + 1)).attr('iddet') });
+      //   }
+      //   console.log( 'valor del contenido ',  $("#D" + solicitud + (index + 1)).text() + 'valor defecto ', $("#D" + solicitud + (index + 1)).attr('valor') );
+      // }
+
+      //si se rechaza tiene otro tratamiento... 
+    if(estado == 'RECHAZADO'){
+      //si es rechazado debe ingresar un motivo por el rechazo
+      var motivo = prompt("INGRESE MOTIVO RECHAZO !!!" );
+      if(motivo == null ) return ;
+      if(motivo.length == 0){
+        swal.fire('No ingreso ningun motivo !!!');
+        return ;
+      }
+      datos.push({name: 'motivo' , value: motivo });
+
+    }else if(estado == 'ESPERA'){
+      //si es rechazado debe ingresar un motivo por el rechazo
+      var motivo = prompt("INGRESE MOTIVO de ESPERA !!!" );
+      if(motivo == null ) return ;
+      if(motivo.length == 0){
+        swal.fire('No ingreso ningun motivo !!!');
+        return ;
+      }
+      datos.push({name: 'motivo' , value: motivo });
+    }else if(estado == 'PENDIENTE'){
+      //si es rechazado debe ingresar un motivo por el rechazo
+      var motivo = prompt("INGRESE MOTIVO de ESPERA !!!" );
+      if(motivo == null ) return ;
+      if(motivo.length == 0){
+        swal.fire('No ingreso ningun motivo !!!');
+        return ;
+      }
+      datos.push({name: 'motivo' , value: motivo }); 
+    // }else if(estado == 'ENTREGADO'){ 
+    //   if($("#TD"+solicitud+" tbody tr:contains(ESPERA)").length > 0 ){ 
+    //     alert('Existen item en Espera actualice el estado del item de espera a Aprobado !! '); 
+    //     return; 
+    //   } 
+    }else{
+
+           /* CONTROL ANTERIOR LOS ITEN RECHAZADO NO PUEDEN MODIFICARSE MAS... 
+      //para aprobar todos los estados tienen que estar nuevo.. 
+      if($("#TD"+solicitud+" tbody tr:contains(RECHAZADO)").length > 0 ){ 
+        alert('No puede aprobar si un item del detalle esta rechazado !! ') ;
+        return ;
+      }
+      */
+      datos.push({name: 'motivo' , value: '' }); 
+
+    }
+  
+    console.log(datos);
+    var promesa = new Promise((resolve , reject )=>{
+        
+      $.post(URL + `/garantia-aprobacion`, datos  ) 
+      .done(function( data ) { 
+        console.log(data); 
+        swal.fire('Datos Grabados correctamente...'); 
+        //window.location.reload(); 
+        resolve(1);
+      }) 
+      .fail(function(err) { 
+        swal.fire('error al grabar detalle.. ' + err , '', 'error' ); 
+        reject(0);
+        return ;
+      }); 
+    });
+    promesa
+    .then((value)=>{
+      //this.buscar(0);
+    })
+    .then(async(value)=>{
+      console.log('aprobacion datos... ');
+      console.log(area , solicitud , estado );
+      if(estado == 'APROBADO'){
+        if(area == 'TALLER'){
+          area = 'GARANTIA';
+        }else if( area == 'GARANTIA'){
+          area = 'REPUESTO';
+        }
+      }
+      this.websocket.emit('pendientes', { 
+          mensaje: 'El '+ localStorage.getItem('area') +' '+ localStorage.getItem('nombre') +' ha modificado la Solicitud de OT NRO '+ ot +' en estado  '+ estado +' !!! ' , 
+          para: operario,
+          area: area 
+      });
+      if(area === 'REPUESTO' || area === 'GARANTIA'){
+        await fetch(URL+"/garantia-chatId/" + operario )
+        .then(response => response.json())  // convertir a json
+        .then(async(json) => {
+          const chatId = json[0].chat_id;
+          await fetch(URL +`/telegram-send?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${ot} motivo ${motivo}` )
+            .then(response => response.json())  // convertir a json
+            .then(json => console.log('se envio telegram....'))
+            .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
+        })
+        .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
+      }
+     
+
+    });    
   }
 
 }
