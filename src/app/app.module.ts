@@ -29,7 +29,8 @@ import { UsuariosComponent } from './componentes/usuarios/usuarios.component';
 import {WebsocketService } from '../app/servicios/websocket.service';
 import { ReportesComponent } from './componentes/reportes/reportes.component';
 import { NgxMaskModule, IConfig } from 'ngx-mask';
-import { ImpresionComponent } from './componentes/impresion/impresion.component'
+import { ImpresionComponent } from './componentes/impresion/impresion.component';
+import { DocumentacionComponent } from './componentes/documentacion/documentacion.component'
 
 export const options: Partial<IConfig> | (() => Partial<IConfig>) = null;
 
@@ -44,6 +45,7 @@ export const options: Partial<IConfig> | (() => Partial<IConfig>) = null;
     UsuariosComponent,
     ReportesComponent,
     ImpresionComponent,
+    DocumentacionComponent,
   ],
   imports: [
     BrowserModule,

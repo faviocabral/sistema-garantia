@@ -141,6 +141,8 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
         .map(item =>{ return( {...item, orderEstado:({'PENDIENTE':1 , 'ENTREGADO':2 , 'APROBADO':3, 'CERRADO':4, 'RECHAZADO':5})[item.estado] } )})
         .sort((a,b)=> a.orderEstado - b.orderEstado || a.area.localeCompare(b.area) || b.FSolicitud - a.FSolicitud )
         console.log(rs['rows']);
+        rs['rows'].forEach(item=> delete item.comentario )
+
         if(rs['rows'].length == 0 ){
           swal.fire('No existen registros !!', '', 'warning');
           return ;
@@ -662,8 +664,8 @@ async detalleSolicitud(ot, vin ){
 
   await fetch(`${URL}/garantia-solicitudes?ot=${ot}&usuario=admin&area=ADMINISTRADOR`)
         .then(response => response.json())
-        .then(res => {console.log(res)
-        
+        .then((res) => {console.log(res)
+          localStorage.setItem('idSolicitud', res.rows[0]['id'])
           let plantilla = `
             <style type="text/css">
             *{
@@ -675,7 +677,7 @@ async detalleSolicitud(ot, vin ){
                 display: grid;
                 grid-template-columns: 1fr;
                 /*grid-template-rows: 30px 0px 150px 550px 600px 150px;*/
-                grid-template-rows: 30px 0px 150px auto auto  130px;                                
+                grid-template-rows: 30px 0px 150px auto auto auto;                                
                 grid-gap: 5px;
                 height: 99%;
                 width: 100%;
@@ -786,6 +788,14 @@ async detalleSolicitud(ot, vin ){
                 border-left: 1px solid #8b8b8b; 
                 padding-left:5px;
             }
+
+            .box3 .b3-row2-empty{ 
+              display: flex;
+              align-items: center;
+              justify-content: left;
+              padding-left:5px;
+            }
+
             .title-detail{
               background-color:#f4f4f5;
               font-weight:bold;
@@ -795,7 +805,7 @@ async detalleSolicitud(ot, vin ){
             .box4{ 
                 display: grid;
                 /*grid-template-columns: 0.2fr 0.4fr 1.5fr 0.1fr 0.2fr 0.7fr;*/
-                grid-template-columns: 0.2fr auto auto 0.1fr 0.2fr auto;
+                grid-template-columns: 0.2fr auto auto 0.1fr 0.2fr auto auto;
                 /* border-bottom: 1px solid #8b8b8b; */
                 border: 1px solid #8b8b8b;
                 border-radius: 5px;
@@ -814,19 +824,24 @@ async detalleSolicitud(ot, vin ){
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                grid-column: span 6;
+                grid-column: span 7;
                 font-weight:bold;
             }
   
             .box4 .b4-row2{ 
-                padding-left: 5px;
-                display: flex;
-                align-items: center;
-                justify-content: left;
-                border-bottom: 1px solid #8b8b8b; 
-                border-left: 1px solid #8b8b8b; 
+              padding-left: 5px;
+              display: flex;
+              align-items: center;
+              justify-content: left;
+              border-bottom: 1px solid #8b8b8b; 
+              border-left: 1px solid #8b8b8b; 
             }
-  
+            .box4 .b4-row2-empty{ 
+              padding-left: 5px;
+              display: flex;
+              align-items: center;
+              justify-content: left;
+            }
             .box5{ 
                 display: grid;
                 grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
@@ -852,17 +867,23 @@ async detalleSolicitud(ot, vin ){
             }
   
             .box5 .b5-row2{ 
-                padding-left: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-bottom: 1px solid #8b8b8b; 
-                border-left: 1px solid #8b8b8b; 
-            }
+              padding-left: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-bottom: 1px solid #8b8b8b; 
+              border-left: 1px solid #8b8b8b; 
+          }
+          .box5 .b5-row2-empty{ 
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
 
             .box6{ 
               display: grid;
-              grid-template-columns: 1fr 1fr 1fr;
+              grid-template-columns: 0.2fr 1fr 0.1fr 0.3fr;
               border: 1px solid #8b8b8b;
               border-radius: 5px;
             }
@@ -871,7 +892,7 @@ async detalleSolicitud(ot, vin ){
               border-bottom: 1px solid #8b8b8b;
               /*display: flex;*/
               align-items: center;
-              grid-column: span 3;
+              grid-column: span 4;
               text-align:center;
             }
             .box6 .b6-row2{ 
@@ -933,7 +954,10 @@ async detalleSolicitud(ot, vin ){
                   <div class="b2-row2-col">JEFE GRUPO: </div><div class="b2-row2-col" id="so-nombreJefeGrupo"> </div> 
                   <div class="b2-row2-col">MECANICO: </div><div class="b2-row2-col" id="so-mecanico"> </div>
               </div>
-  
+              <div class="b2-row2">
+                  <div class="b2-row2-col">ASESOR: </div><div class="b2-row2-col" id="so-asesor"> </div> 
+                  <div class="b2-row2-col">APROBADO POR: </div><div class="b2-row2-col" id="aprobadoPor"> </div> 
+              </div>
   
           </div>
   
@@ -963,8 +987,9 @@ async detalleSolicitud(ot, vin ){
               <div class="b4-row2 title-detail">REMISION</div>
               <div class="b4-row2 title-detail">CODIGO</div>
               <div class="b4-row2 title-detail">ARTICULO</div>
-              <div class="b4-row2 title-detail">CANT.</div>
+              <div class="b4-row2 title-detail">CANT</div>
               <div class="b4-row2 title-detail">FECHA</div>
+              <div class="b4-row2 title-detail">EMISOR</div>
               <div class="b4-row2 title-detail">MECANICO</div>
   
               <!--datos  6 COL fila 1 -->
@@ -999,6 +1024,8 @@ async detalleSolicitud(ot, vin ){
               <div class="b6-row2 title-detail">CODIGO</div>
               <div class="b6-row2 title-detail">MOB</div>
               <div class="b6-row2 title-detail">CANTIDAD</div>
+              <div class="b6-row2 title-detail">CODIFICADO POR</div>
+              
               
               <!--datos  4 COL fila 1 -->
               <!-- <div class="b6-row2"></div><div class="b6-row2"></div><div class="b6-row2"></div><div class="b5-row2"></div>
@@ -1020,6 +1047,7 @@ async detalleSolicitud(ot, vin ){
               showConfirmButton: false,
               //run after show popup 
               didOpen:()=>{
+                //$(` #aprobadoPor`).text( log.filter(item=> item.estado === 'APROBADO')['usuario'] || '' )
                 //recorremos la fila 
                 res.rows.forEach(item=> {
                   Object.entries(item).map(item=> {
@@ -1038,44 +1066,50 @@ async detalleSolicitud(ot, vin ){
                   $(`.box3`).append(`<div class="b3-row2">${item.incidente}</div> <div class="b3-row2">${item.piezaCausal}</div> <div class="b3-row2">${item.repuesto}</div> <div class="b3-row2">${item.motivo}</div> <div class="b3-row2">${item.reparacion}</div>`)  
                   //$(` #ot2`).text( "#"+ $("#so-ot").text() )
                 })
-                //agregamos los detalles faltantes 
-                if(res.rows.length < 20){
-                  let detalle1 = new Array(10 - res.rows.length).fill('<div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div> <div class="b3-row2">&nbsp;</div>\n',0)
-                  detalle1.map(item=> $(`.box3`).append(item))
-                }
+                // //agregamos los detalles faltantes 
+                // if(res.rows.length < 20){
+                //   let detalle1 = new Array(20 - res.rows.length).fill('<div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div>\n',0)
+                //   detalle1.map(item=> $(`.box3`).append(item))
+                // }
 
                 //detalle repuesto... 
                 repuesto.remision.map(item=>{
                   $(`.box4`).append(`<div class="b4-row2">${item.REMISION}</div> <div class="b4-row2">${item.CODIGO}</div> <div class="b4-row2">${item.ARTICULO}</div>
-                  <div class="b4-row2">${item.CANTIDAD}</div> <div class="b4-row2">${item.fecha}</div> <div class="b4-row2">${item.firmado}</div>\n `)  
+                  <div class="b4-row2">${item.CANTIDAD}</div> <div class="b4-row2">${item.fecha}</div> <div class="b4-row2">${item.userCreate}</div> <div class="b4-row2">${item.firmado}</div> \n `)  
                 })
 
-                if(repuesto.remision.length < 20){
-                  let detalle2 = new Array(10 - repuesto.remision.length).fill( `
-                  <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
-                  <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>\n `)
-                  detalle2.map(item=> $(`.box4`).append(item))
-                }
+                // if(repuesto.remision.length < 20){
+                //   let detalle2 = new Array( 20 - repuesto.remision.length).fill( `
+                //   <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div>
+                //   <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div>\n `)
+                //   detalle2.map(item=> $(`.box4`).append(item))
+                // }
 
-                //detalle de mantenimiento... 
+                //detalle de mantenimiento...
                 servicios.rows.map(item=>{
                   $(`.box5`).append( `<div class="b5-row2">${item.fila}</div><div class="b5-row2">${item.fecha}</div><div class="b5-row2">${item.servicio}</div><div class="b5-row2">${item.km}</div> <div class="b5-row2">${item.taller}</div> `)
                 })
                 
-                let detalle3 = new Array(5 - servicios.rows.length).fill( `<div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div><div class="b5-row2">&nbsp;</div>\n `)
-                detalle3.map(item=> $(`.box5`).append(item))
+                // let detalle3 = new Array(5 - servicios.rows.length).fill( `<div class="b5-row2-empty">&nbsp;</div><div class="b5-row2-empty">&nbsp;</div><div class="b5-row2-empty">&nbsp;</div><div class="b5-row2-empty">&nbsp;</div>\n `)
+                // detalle3.map(item=> $(`.box5`).append(item))
 
                 //detalle repuesto... 
                 mob.map(item=>{
-                  $(`.box6`).append(`<div class="b6-row2">${item.codigo}</div> <div class="b6-row2">${item.descripcion}</div> <div class="b6-row2">${item.cantidad}</div>\n `)  
+                  $(`.box6`).append(`<div class="b6-row2">${item.codigo}</div> <div class="b6-row2">${item.descripcion}</div> <div class="b6-row2">${item.cantidad}</div> <div class="b6-row2">${item.user_ins}</div>\n `) 
                 })
-                if(mob.length === 0) $(`.box6`).append(`<div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div>\n `)  
+                if(mob.length === 0) $(`.box6`).append(`<div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div\n `)  
 
                 //agregamos el evento imprimir al boton 
                 document.getElementById('printSolicitud').addEventListener('click', () => { this.imprimir() });
                 document.getElementById('closePreview').addEventListener('click', () => { swal.close() });
               }
             })
+        })
+        .then(async (x)=>{
+           let id = localStorage.getItem('idSolicitud')
+           res =  await fetch( URL + "/garantia-log?solicitud=" + id )
+           let log = await res.json();
+           $(`#aprobadoPor`).text( String(log.rows[ log.rows.length -1 ]['usuario']).toUpperCase() )
         })
 }
 

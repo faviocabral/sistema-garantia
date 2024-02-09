@@ -10,9 +10,11 @@ import { MessagingService } from '../../servicios/messaging.service';
 import { WebsocketService } from 'src/app/servicios/websocket.service';
 import { info } from 'console';
 import { Subscription } from 'rxjs';
+import Swal from 'sweetalert2';
 
 const URL = localStorage.getItem('url');
 let G_listMob = []
+let botonAceptar = false;
 @Component({
   selector: 'app-solitidud',
   templateUrl: './solitidud.component.html',
@@ -160,12 +162,12 @@ ngOnDestroy(){
           //ver si ya tiene activo traer los datos como estan... 
           var usuario = localStorage.getItem('user');
           var area = localStorage.getItem('area');
-       
+          console.log('direccion ', URL + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area)
           $.get(URL + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area, async function (data, status) {
             //si ya existe la solicitud recuperar los datos.. 
             if (data['rows'].length > 0) {
               var datos = data['rows'];
-              console.log(datos)
+              console.log('datos de solicitudes ', datos)
               var body = "";
               localStorage.setItem("detalle-solicitud", JSON.stringify(datos))
               
@@ -209,6 +211,7 @@ ngOnDestroy(){
               $("#sintoma").val(datos[0]['sintoma']);//se recupera de la primera fila .
               $("#fechaCierre").val(String( datos[0]['fechaCierre']|| '').slice(0,10));//se recupera de la primera fila .
               $("#kmCierre").val(datos[0]['kmCierre']);//se recupera de la primera fila .
+              $("#comentario").val(datos[0]['comentario']);//se recupera de la primera fila .
               //$("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
               $("#vdn").attr('readonly', true);
               $("#tipoGarantia").attr("disabled", true); 
@@ -216,6 +219,7 @@ ngOnDestroy(){
               $("#sintoma").attr("disabled", true); 
               ($("#kmCierre").val().trim().length > 0 )? $("#kmCierre").attr("disabled", true): ''; 
               ($("#fechaCierre").val().trim().length > 0 )? $("#fechaCierre").attr("disabled", true): '';
+              console.log('detalle de la pieza solicitada', body)
               document.querySelector('#piezasSolicitadas').innerHTML = body;
 
               if( ($("#area").val() == 'GARANTIA' && $("#estado").val() == 'APROBADO') || $("#area").val() == 'REPUESTO' ){
@@ -740,6 +744,163 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
 
   }
 
+  async agregarServicioTercero2(){
+    //swal.fire('Nuevo Servicio', '' , 'info')
+
+    const form = `
+        <form id="form-ta">
+        <div class="row">
+          <div class="col-sm-12 ">
+            <input type="text" class="form-control" placeholder="Taller?" id="taller-ta"  required>
+          </div>                      
+        </div>
+        <div class="row mt-2">
+            <div class="col-sm-5 ">
+              <input type="text" class="form-control" placeholder="Fecha ddmmaaaa" id="fecha-ta"  mask="00-00-0000" required>
+            </div>
+            <div class="col-sm-7 ml-0">
+              <input type="text" class="form-control" placeholder="Km entrada.." id="kilometraje-ta" mask="separator.0" thousandSeparator="." separatorLimit="200000" required>
+            </div>
+        </div>
+          <div class="d-flex mt-2">
+          <select class="form-control" id="service-ta">
+          <option value=""><b>km Servicio</b></option>
+          <option value="5000">5000 km</option>
+          <option value="10000">10000 km</option>
+          <option value="15000">15000 km</option>
+          <option value="20000">20000 km</option>
+          <option value="25000">25000 km</option>
+          <option value="30000">30000 km</option>
+          <option value="35000">35000 km</option>
+          <option value="40000">40000 km</option>
+          <option value="45000">45000 km</option>
+          <option value="50000">50000 km</option>
+          <option value="55000">55000 km</option>
+          <option value="60000">60000 km</option>
+          <option value="65000">65000 km</option>
+          <option value="70000">70000 km</option>
+          <option value="75000">75000 km</option>
+          <option value="80000">80000 km</option>
+          <option value="85000">85000 km</option>
+          <option value="90000">90000 km</option>
+          <option value="95000">95000 km</option>
+          <option value="100000">100000 km</option>
+          <option value="105000">105000 km</option>
+          <option value="110000">110000 km</option>
+          <option value="115000">115000 km</option>
+          <option value="120000">120000 km</option>
+          <option value="125000">125000 km</option>
+        </select>
+          <button type="button" id="bServicioTercero-ta" (click)="agregarLinea()" class="btn btn-primary ml-1 mb-1"
+            style="position: relative; float: right; border-radius:10px;">
+            <i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>
+            </button>
+          </div>
+      </form> 
+      <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-5 mt-2">
+      <thead>
+        <tr>
+          <th>Nro</th>
+          <th>Fecha</th>
+          <th>Service</th>
+          <th>Km</th>
+          <th>Taller</th>
+        </tr>
+      </thead>
+      <tbody id="detServicioTercero-ta">
+      </tbody>
+    </table>
+    <div class="row">
+    <div class="col-sm-12 ">
+      <button type="button" class="btn btn-success m-0" id="btInsertar" style="visibility:hidden;"> Listo </button>
+    </div>                      
+  </div>    
+    `
+    swal.fire({
+      title: `Servicios Terceros`,
+      showCloseButton: true,
+      showCancelButton: false,
+      showConfirmButton: false,
+      html: form,
+    })
+    localStorage.setItem('servicios-terceros',  JSON.stringify([]) );  
+    document.getElementById("bServicioTercero-ta").addEventListener('click', () => this.agregarLinea() )
+    document.getElementById("btInsertar").addEventListener('click', async() => {
+      //insertamos los datos y si estan correctos lo mostramos en pantalla... 
+      let datos = JSON.parse( localStorage.getItem('servicios-terceros'))
+      if(datos.length > 0 ){
+        datos.forEach(item=> delete item.id)
+        //supersapo
+        await fetch(URL + `/garantia-ins-ser-ter`, {
+          method: "POST",
+          body: JSON.stringify(datos),
+          headers: {"Content-type": "application/json; charset=UTF-8"}
+        })
+        .then(response => response.json()) 
+        .then(json =>{
+          alert('Datos grabados correctamente !!!')
+          swal.close()
+          this.recuperarServiciosTerceros()
+        } )
+        .catch(err => {
+          alert('Hubo un error al grabar los datos ' + err )
+          console.log('hubo un error el grabar los servicios terceros ', err)
+        });
+            
+      }else{
+        alert('No existen registros para actualizar la lista!!')
+      }
+    })
+    
+  }
+
+  agregarLinea(){
+    //controlamos la carga 
+    if ($("#fecha-ta").val().length == 0 || $("#kilometraje-ta").val().length == 0 || $("#service-ta").val() == 0  || $("#taller-ta").val().length == 0){
+      alert('Debe ingresar valores en los campos requeridos...!! \nEjemplo: \n Taller: KTM\n Fecha: 20240101 \n Km Entrada: 15250 \n Km Servicio: 15000 km.' );
+      return;
+    }
+
+    var item = $('#detServicioTercero-ta tr').length + 1 ;
+    if (item <= 4 ){
+      var fila = '<tr id="fst'+item+'">'+
+                    '<td>'+ item +'</td>'+
+                    '<td>'+ $("#fecha-ta").val() +'</td>'+
+                    '<td>'+ $("#service-ta").val() +'</td>'+
+                    '<td>'+ $("#kilometraje-ta").val() +'</td>'+
+                    '<td>'+ $("#taller-ta").val() +'</td>'+
+                    '<td  style="text-align: center;" class="pl-1 pr-1">'+ 
+                      '<button type="button" class="btn btn-danger btn-sm m-0" id="bst'+item+'"> <i class="fa fa-trash-alt" aria-hidden="true"></i> </button>' 
+                    +'</td>'+
+                  '</tr>';
+      let datos = {
+        id: item,
+        fecha: $("#fecha-ta").val() ,
+        servicio:$("#service-ta").val()  ,
+        kilometraje: $("#kilometraje-ta").val() ,
+        taller:$("#taller-ta").val()  ,
+        ot: $("#ot").val() ,
+        user_ins: localStorage.getItem('user')
+      }
+      let valor = JSON.parse(localStorage.getItem('servicios-terceros'))
+      console.log('items ', valor)
+      if(valor.length === 0 ){
+        localStorage.setItem('servicios-terceros', JSON.stringify([datos]) );  
+      }else{
+        valor.push( datos )
+        localStorage.setItem('servicios-terceros', JSON.stringify(valor) );  
+      }
+      $('#detServicioTercero-ta:first').append(fila); 
+      $("#fecha-ta").val('');
+      $("#kilometraje-ta").val('');
+      $("#service-ta").val('');
+      $("#taller-ta").val('');
+      $("#taller-ta").focus();
+      $("#btInsertar").css('visibility', 'visible');
+      document.getElementById('bst'+ item ).addEventListener('click', () => { this.delServicioTercero(item) });
+    }
+  }
+
   agregarServicioTercero (){
     console.log('entro para agregar el servicio tercero... ');
 
@@ -781,7 +942,6 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
     }else{
       swal.fire('Solo hasta cuatro items se puede agregar en el listado !!!','','warning');
     }
-
     
   }
 
@@ -789,9 +949,12 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
     //swal.fire('Eliminar registro !!' + id , '', 'error');
     $("#fst" + id).remove();
     if ( $('#detServicioTercero tr button').length === 0 ){
-      $('#bInsertarServicioTercero').css('display', 'none');
+      //$('#bInsertarServicioTercero').css('display', 'none');
+      $('#btInsertar').css('visibility', 'hidden');
     }
-
+    let datos = JSON.parse(localStorage.getItem('servicios-terceros'))
+    datos = datos.filter(item=> item.id !== id)
+    localStorage.setItem('servicios-terceros',JSON.stringify(datos))
   }
 
  async insertarServicioTercero(){
@@ -853,10 +1016,12 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
               '<td>'+ item.servicio +'</td>'+
               '<td>'+ item.kilometraje +'</td>'+
               '<td>'+ item.taller +'</td>'+
-              '<td  style="text-align: center;" class="pl-1 pr-1"></td>'+
+              //'<td  style="text-align: center;" class="pl-1 pr-1"></td>'+
             '</tr>';
           })
-          $('#detServicioTercero:first').append(fila); 
+          //$('#detServicioTercero:first').append(fila); 
+          $('#detServicio').append(fila);
+          //detServicio          
           
         }
       } )    //imprimir los datos en la consola
@@ -1038,8 +1203,8 @@ async ultimasGarantias(){
 
         let detalle = rows.map((item,x)=> `<tr id='mob-${x+1}'> 
           <td>${item.ot}</td>
-          <td>${item.pedido}</td>
           <td>${item.fecha}</td>
+          <td>${item.pedido}</td>
         </tr>` )
         $("#det-garantia").html(detalle)
 

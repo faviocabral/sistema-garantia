@@ -11,6 +11,7 @@ import { AuthGuardService } from './servicios/auth-guard.service';
 import { GarantiaGuard } from './servicios/garantia.guard';
 import { LoginGuardGuard } from './servicios/login-guard.guard';
 import { SolicitudGuard } from './servicios/solicitud.guard';
+import { DocumentacionComponent } from './componentes/documentacion/documentacion.component';
 
 const routes: Routes = [
   { path: 'garantia/Tablero', component: TableroComponent , canActivate:[AuthGuardService, GarantiaGuard]  },
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'garantia/Solicitud/:id', component: SolitidudComponent , canActivate:[AuthGuardService, SolicitudGuard] },
   { path: 'garantia/Usuarios', component: UsuariosComponent , canActivate:[AuthGuardService] },
   { path: 'garantia/Reportes', component: ReportesComponent , canActivate:[AuthGuardService] },
+  { path: 'garantia/Documentacion', component: DocumentacionComponent },
   { path: '**', redirectTo: 'garantia/Tablero' }, 
   { path: '', redirectTo: 'garantia/Tablero', pathMatch: 'full' },
 ];
