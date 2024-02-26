@@ -37,9 +37,12 @@
             -->
         <div class="row mr-1 ml-1">
           <div class="col-sm-6">
-            <div class="form-group">
-              <label for="idSolicitud"><i class="fa fa-bookmark" aria-hidden="true"></i> NRO SOLICITUD:</label>
+            <label for="idSolicitud"><i class="fa fa-bookmark" aria-hidden="true"></i> NRO SOLICITUD:</label>
+            <div class="input-group">
               <input type="text" class="form-control" id="id" name="id" placeholder="Solicitud" readonly>
+              <div class="input-group-append">
+                <button class="btn btn-warning pb-0 pt-0 pl-2 pr-2 elevation-1" type="button" (click)="detalleSolicitud()" ><strong><i class="fa fa-bookmark" aria-hidden="true" style="font-size: 26px;"></i></strong> </button>
+              </div>
             </div>
           </div>
           <div class="col-sm-6">
@@ -256,6 +259,9 @@
               <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#mora"> <strong>MORA</strong> </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#logs"> <strong>OBS</strong> </a>
+              </li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane fade show active" id="garantias">
@@ -292,12 +298,31 @@
                 </div>                
                 <span ><strong id="sin-campanha"></strong> </span>
               </div>
+
               <div class="tab-pane fade" id="mora" >
                 <span ><strong id="cliente-mora"></strong></span>
               </div>
 
-            </div>
+              <div class="tab-pane fade" id="logs" >
+                <div class="table-responsive" style="border-radius: 5px;">
+                  <table class="table table-bordered table-striped table-sm table-hover text-nowrap mb-1" id="table-campanha">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Area</th>
+                        <th>Estado</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                      </tr>
+                    </thead>
+                    <tbody id="registros-log">
+                    </tbody>
+                  </table>
+                </div>                
 
+              </div>              
+
+            </div>
 
           </div>
         </div>
@@ -340,15 +365,33 @@
             <div class="col-sm-6">
               <div class="form-group">
                 <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> Kilometraje cierre:</label>
-                <input type="text" class="form-control text-uppercase cierre-garantia" id="kmCierre" name="kmCierre" placeholder="Km Cierre" required>
+                <input type="text" class="form-control text-uppercase cierre-garantia" id="kmCierre" name="kmCierre" placeholder="Km Cierre" (keypress)="keyPress($event)"  required>
               </div>
             </div>
-            <div class="col-sm-12">
-              <button type="button" (click)="actualizarCierre()" class="btn btn-primary ml-1 cierre-garantia"
-                style="position: relative; float: right; border-radius:10px;">
-                Actualizar
-              </button>
         </div>
+
+        <div class="row mr-1 ml-1 rounded bg-light " style="margin-bottom:10px;">
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> Nro de Reclamo:</label>
+              <input type="text" class="form-control text-uppercase cierre-garantia" id="nroReclamo" name="nroReclamo" placeholder="Nro de Reclamo" required>
+            </div>
+          </div>
+          
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> Nro PWA:</label>
+              <input type="text" class="form-control text-uppercase cierre-garantia" id="nroPwa" name="nroPwa" placeholder="Nro PWA" required>
+            </div>
+          </div>
+          <div class="col-sm-12">
+            <button type="button" (click)="actualizarCierre()" class="btn btn-primary ml-1 cierre-garantia"
+              style="position: relative; float: right; border-radius:10px;">
+              Actualizar
+            </button>
+          </div>
+
         </div>
 
         <div class="row mr-1 ml-1">
@@ -369,7 +412,7 @@
                 <input type="text" class="form-control" id="motivoReclamo" placeholder="Diagnostico tecnico.." required>
               </div>
               <div class="col-sm-3" style="display: inline-flex;">
-                <input type="text" class="form-control mb-1" id="cantidad" placeholder="ingrese cantidad.." required>
+                <input type="text" class="form-control mb-1" id="cantidad" placeholder="ingrese cantidad.." (keypress)="keyPress($event)"  required>
               </div>
              
               <div class="col-sm-9" style="display: inline-flex;">

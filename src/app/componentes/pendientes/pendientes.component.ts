@@ -48,7 +48,16 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
       $('#pendientes').height(window.innerHeight - 215 );
     }
     $('#pendientes').height(window.innerHeight - 215 );
-    
+
+    if( !"GARANTIA ADMINISTRADOR".includes(localStorage.getItem("area"))){
+      $("#idSucursal").css( "display", "none" ) ;
+    }
+    $("#idSucursal").val(localStorage.getItem('sucursal'))
+    document.getElementById("idSucursal").addEventListener('change',()=>{ //se agrega el evento ...
+      localStorage.setItem('sucursal', $("#idSucursal").val())
+      this.buscar(0)
+    }); 
+
   }
 
   ngAfterViewInit(){
@@ -124,22 +133,23 @@ export class PendientesComponent implements OnInit,AfterViewInit, OnDestroy {
     }
 
   buscar(ot){
+
     var promesa = new Promise((resolve , reject)=>{
       this.spinner(1); 
       //var fechai = $("#fechai").val().replaceAll("-", ""); 
       //var fechaf = $("#fechaf").val().replaceAll("-", ""); 
       var usuario = localStorage.getItem('user');
       var area = localStorage.getItem('area');
-
-      $.get(URL+ "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area, function(data, status){
+      console.log(URL+ "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area + "&sucursal=" + localStorage.getItem('sucursal'))
+      $.get(URL+ "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area + "&sucursal=" + localStorage.getItem('sucursal'), function(data, status){
         console.log('estado de la consulta ', status );
       })
       .done((rs)=>{ 
         this.spinner(0); 
         //ordernar los resultados... pendiente rechazado y aprobado
-        rs['rows'] = rs['rows']
-        .map(item =>{ return( {...item, orderEstado:({'PENDIENTE':1 , 'ENTREGADO':2 , 'APROBADO':3, 'CERRADO':4, 'RECHAZADO':5})[item.estado] } )})
-        .sort((a,b)=> a.orderEstado - b.orderEstado || a.area.localeCompare(b.area) || b.FSolicitud - a.FSolicitud )
+        // rs['rows'] = rs['rows']
+        // .map(item =>{ return( {...item, orderEstado:({'PENDIENTE':1 , 'ENTREGADO':2 , 'APROBADO':3, 'CERRADO':4, 'RECHAZADO':5})[item.estado] } )})
+        // .sort((a,b)=> a.orderEstado - b.orderEstado || a.area.localeCompare(b.area) || b.FSolicitud - a.FSolicitud )
         console.log(rs['rows']);
         rs['rows'].forEach(item=> delete item.comentario )
 
@@ -662,7 +672,7 @@ async detalleSolicitud(ot, vin ){
   console.log(mob)
   
 
-  await fetch(`${URL}/garantia-solicitudes?ot=${ot}&usuario=admin&area=ADMINISTRADOR`)
+  await fetch(`${URL}/garantia-solicitudes?ot=${ot}&usuario=admin&area=ADMINISTRADOR&sucursal=` + localStorage.getItem('sucursal'))
         .then(response => response.json())
         .then((res) => {console.log(res)
           localStorage.setItem('idSolicitud', res.rows[0]['id'])
@@ -958,7 +968,12 @@ async detalleSolicitud(ot, vin ){
                   <div class="b2-row2-col">ASESOR: </div><div class="b2-row2-col" id="so-asesor"> </div> 
                   <div class="b2-row2-col">APROBADO POR: </div><div class="b2-row2-col" id="aprobadoPor"> </div> 
               </div>
-  
+
+              <div class="b2-row2">
+                <div class="b2-row2-col">NRO RECLAMO: </div><div class="b2-row2-col" id="so-nroReclamo"> </div> 
+                <div class="b2-row2-col">NRO PWA: </div><div class="b2-row2-col" id="so-nroPwa"> </div> 
+              </div>
+
           </div>
   
   
@@ -1333,6 +1348,8 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
           area: area 
       });
       if(area === 'REPUESTO' || area === 'GARANTIA'){
+        if (estado === 'CERRADO') return 
+         
         await fetch(URL+"/garantia-chatId/" + operario )
         .then(response => response.json())  // convertir a json
         .then(async(json) => {
@@ -1344,7 +1361,6 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
         })
         .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
       }
-     
 
     });    
   }
@@ -1588,12 +1604,6 @@ async  subAprobar(area, solicitud, estado, operario, ot ){
               .catch(err => console.log('Solicitud fallida', err)); // Capturar errores        
                     
             })
-            /*
-
-select * from sys.tables where name like '%solicitudgar%'
-select * from solicitudAcceso
-select * from solicitudGar_fotos where mediaGroupId = 13480861239748609	--messageId = 2706            
-            */
 
           })
 

@@ -122,7 +122,7 @@ ngOnDestroy(){
           this.campanha()
           this.clienteMora()
           this.ultimasGarantias()
-
+          this.registroEvento()
           //si tiene remision traer los datos... 
           await fetch(URL+`/garantia-repuesto/${ot}`)
           .then(response => response.json())  // convertir a json
@@ -162,8 +162,7 @@ ngOnDestroy(){
           //ver si ya tiene activo traer los datos como estan... 
           var usuario = localStorage.getItem('user');
           var area = localStorage.getItem('area');
-          console.log('direccion ', URL + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area)
-          $.get(URL + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area, async function (data, status) {
+          await $.get(URL + "/garantia-solicitudes?ot=" + ot +"&usuario="+ usuario +"&area="+ area + "&sucursal=" + localStorage.getItem('sucursal'), async function (data, status) {
             //si ya existe la solicitud recuperar los datos.. 
             if (data['rows'].length > 0) {
               var datos = data['rows'];
@@ -200,6 +199,7 @@ ngOnDestroy(){
                 body += '</tr>';
 
               }
+              localStorage.setItem("jefeGrupoChatId", datos[0]['usuario'] );
               $("#fecha").val(datos[0]['FSolicitud']);//se recupera de la primera fila .. 
               $("#vdn").val(datos[0]['vdn']);//se recupera de la primera fila .. 
               $("#tipoGarantia").val(datos[0]['tipoGarantia']);//se recupera de la primera fila .. 
@@ -211,14 +211,20 @@ ngOnDestroy(){
               $("#sintoma").val(datos[0]['sintoma']);//se recupera de la primera fila .
               $("#fechaCierre").val(String( datos[0]['fechaCierre']|| '').slice(0,10));//se recupera de la primera fila .
               $("#kmCierre").val(datos[0]['kmCierre']);//se recupera de la primera fila .
+              $("#nroReclamo").val(datos[0]['nroReclamo']);//se recupera de la primera fila .
+              $("#nroPwa").val(datos[0]['nroPwa']);//se recupera de la primera fila .
               $("#comentario").val(datos[0]['comentario']);//se recupera de la primera fila .
               //$("#jefeGrupo").val(datos[0]['jefeGrupo']);//se recupera de la primera fila .
               $("#vdn").attr('readonly', true);
               $("#tipoGarantia").attr("disabled", true); 
               $("#mecanico").attr("disabled", true); 
               $("#sintoma").attr("disabled", true); 
-              ($("#kmCierre").val().trim().length > 0 )? $("#kmCierre").attr("disabled", true): ''; 
-              ($("#fechaCierre").val().trim().length > 0 )? $("#fechaCierre").attr("disabled", true): '';
+
+              ($("#nroReclamo").val().trim().length > 0 )? $("#nroReclamo").attr("disabled", true): $("#nroReclamo").attr("disabled", false); 
+              ($("#nroPwa").val().trim().length > 0 )? $("#nroPwa").attr("disabled", true): $("#nroPwa").attr("disabled", false); 
+
+              ($("#kmCierre").val().trim().length > 0 )? $("#kmCierre").attr("disabled", true): $("#kmCierre").attr("disabled", false); 
+              ($("#fechaCierre").val().trim().length > 0 )? $("#fechaCierre").attr("disabled", true): $("#fechaCierre").attr("disabled", false);
               console.log('detalle de la pieza solicitada', body)
               document.querySelector('#piezasSolicitadas').innerHTML = body;
 
@@ -236,6 +242,79 @@ ngOnDestroy(){
                   document.getElementById('bMotivo-'+datos[index]['fila']).addEventListener('click', async(x) => {
                     //alert(datos[index]['idDet'])
 
+
+                      //memo
+                      const form = `
+                      <form id="form-ta">
+
+                      <div class="row">
+                        <div class="col-sm-4 ">
+                          <input type="text" class="form-control" placeholder="ID" id="idDetalle" value="${datos[index]['idDet']}" readonly>
+                        </div>                      
+                      </div>
+
+                      <div class="row mt-3">
+                      <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> PIEZAS SOLICITADAS:</label>                        
+                        <div class="col-sm-12 ">
+
+                          <input type="text" class="form-control" placeholder="Piezas Solicitadas2" id="piezasSolicitadas2" value="${datos[index]['repuesto']}" required>
+                        </div>                      
+                      </div>
+
+                      <div class="row mt-3">
+                      <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> DIAGNOSTICO TECNICO:</label>                        
+                        <div class="col-sm-12 ">
+
+                          <input type="text" class="form-control" placeholder="Diagnostico Tecnico" id="diagnosticoTecnico" value="${datos[index]['motivo']}" required>
+                        </div>                      
+                      </div>
+                      
+                      <div class="row mt-3">
+                      <label for=""><i class="fa fa-bookmark" aria-hidden="true"></i> DESCRIPCION REPARACION:</label>                        
+                        <div class="col-sm-12 ">
+
+                          <input type="text" class="form-control" placeholder="Descripcion Reparacion" id="descripcionReparacion" value="${datos[index]['reparacion']}" required>
+                        </div>                      
+                      </div>
+
+                    </form> 
+                  <div class="row mt-3">
+                  <div class="col-sm-12 ">
+                    <button type="button" class="btn btn-success m-0" id="btInsertar-${datos[index]['fila']}" > Modificar </button>
+                  </div>                      
+                </div>    
+                  `
+                  swal.fire({
+                    title: `Modificar Detalles`,
+                    showCloseButton: true,
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    html: form,
+                  })
+
+                  document.getElementById('btInsertar-'+datos[index]['fila']).addEventListener('click', async(x) => {
+                    let valor = {
+                      repuesto:$("#piezasSolicitadas2").val(),
+                      motivo:$("#diagnosticoTecnico").val(),
+                      reparacion:$("#descripcionReparacion").val()
+                    }
+                    alert(JSON.stringify(valor))
+
+                      await fetch(URL+'/garantia-upd-det-motivo/' + datos[index]['idDet'], {
+                        method: "POST",
+                        body: JSON.stringify(valor),
+                        headers: {"Content-type": "application/json; charset=UTF-8"}
+                      })
+                      .then(json => {
+                        alert('Datos modificados correctamente !!!')
+                        window.location.reload()
+                      })
+                      .catch(err => {console.log(err)
+                        alert('hubo un error en la actualizacion !!')
+                      })
+
+                  })
+/*
                     let res = prompt('Ingrese el nuevo diagnostico de la pieza '+datos[index]['repuesto']+' por favor:')
                     if(res){
 
@@ -251,8 +330,9 @@ ngOnDestroy(){
                       .catch(err => {console.log(err)
                         alert('hubo un error en la actualizacion !!')
                       })
-
                     }
+*/
+
                   })
                 }
               }
@@ -461,11 +541,12 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
         .catch(err => console.log(err))        
       })
       .then(async(x)=>{
-        await fetch(URL +`/telegram-send?chat_id=-916962805&mensaje=TALLER ${localStorage.getItem('nombre')} ha cerrado la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
+        this.websocket.emit('refrescar-pendientes', {msg: 'ok'})             
+        return 
+        await fetch(URL +`/telegram-send?chat_id=-916962805&mensaje= ${localStorage.getItem('nombre')} ha cerrado la solicitud nro OT ${$("#ot").val()} motivo: \n ${res}` )
         .then(response => response.json())  // convertir a json
         .then(json => console.log('se envio telegram....'))
         .catch(err => console.log('Solicitud fallida', err)); // Capturar errores    
-        this.websocket.emit('refrescar-pendientes', {msg: 'ok'})             
       })
       .then(x=>{
         window.location.reload()
@@ -478,7 +559,6 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
     }   
 
   }
-
 
   solicitarPieza() {
     var incidente = $("#incidente").val().toUpperCase();
@@ -578,9 +658,9 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
                   {name: 'estado', value: 'MODIFICADO'} 
                 ); */
       var valor2 = {id: $('#id').val(), estado: 'PENDIENTE', area: 'GARANTIA'} 
-      var promesa = new Promise((resolve , reject )=>{
-        $.post(URL + `/garantia-upd-cab`, valor2)
-        .done(function (valor) {
+      var promesa = new Promise(async (resolve , reject )=>{
+        await $.post(URL + `/garantia-upd-cab`, valor2)
+        .done(async function (valor) {
           //insertar el detalle 
           var detalle = [];
           var tbl = $("#piezasSolicitadas tr"), celda: any;
@@ -602,7 +682,7 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
           }
           console.log(detalle);
     
-          $.post(URL + `/garantia-ins-det`, detalle)
+          await $.post(URL + `/garantia-ins-det`, detalle)
             .done(function (data) {
               console.log('inserto detalle ... ');
               console.log(data);
@@ -676,6 +756,7 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
       console.log(valor)
       //agregar el usuario loggeado 
       valor.push({ name: 'usuario', value: localStorage.getItem('user') });
+      valor.push({ name: 'idSucursal', value: localStorage.getItem('sucursal') });
       //console.log('valores del array.. ');
       //console.log(valor);
       var promesa = new Promise((resolve , reject )=>{
@@ -759,7 +840,7 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
               <input type="text" class="form-control" placeholder="Fecha ddmmaaaa" id="fecha-ta"  mask="00-00-0000" required>
             </div>
             <div class="col-sm-7 ml-0">
-              <input type="text" class="form-control" placeholder="Km entrada.." id="kilometraje-ta" mask="separator.0" thousandSeparator="." separatorLimit="200000" required>
+              <input type="text" class="form-control" placeholder="Km entrada.." id="kilometraje-ta" mask="separator.0" thousandSeparator="." separatorLimit="200000" (keypress)="keyPress($event)" required>
             </div>
         </div>
           <div class="d-flex mt-2">
@@ -824,6 +905,8 @@ async  actualizarDetallePiezaCausal(idCab:string, idDet:string , datos:Object){
       html: form,
     })
     localStorage.setItem('servicios-terceros',  JSON.stringify([]) );  
+    document.getElementById("kilometraje-ta").addEventListener('keypress', (event) => this.keyPress(event) )
+
     document.getElementById("bServicioTercero-ta").addEventListener('click', () => this.agregarLinea() )
     document.getElementById("btInsertar").addEventListener('click', async() => {
       //insertamos los datos y si estan correctos lo mostramos en pantalla... 
@@ -1174,10 +1257,16 @@ async campanha(){
 }
 
 async actualizarCierre(){
-  if($("#fechaCierre").val().length === 0 && $("#kmCierre").val().length ===0 ){alert('Debe ingresar datos de Fecha Cierre y Km de Cierre'); return } 
+  //if($("#fechaCierre").val().length === 0 && $("#kmCierre").val().length ===0 ){alert('Debe ingresar datos de Fecha Cierre y Km de Cierre'); return } 
+  let datos = {
+                fechaCierre: $("#fechaCierre").val().replaceAll('-', '') || null , 
+                kmCierre: $("#kmCierre").val() || null ,
+                nroReclamo: $("#nroReclamo").val() || null ,
+                nroPwa: $("#nroPwa").val() || null ,
+              }
     await fetch(URL+'/garantia-upd-cab-new/' + $("#ot").val() , {
       method: "POST",
-      body: JSON.stringify({fechaCierre: $("#fechaCierre").val().replaceAll('-', '') , kmCierre: $("#kmCierre").val() }),
+      body: JSON.stringify(datos),
       headers: {"Content-type": "application/json; charset=UTF-8"}
     })
     .then(json => {
@@ -1224,15 +1313,17 @@ async clienteMora(){
         if(rows.length === 0 ){
           $("#cliente-mora").html('CLIENTE AL DIA !!')
         } else{
-
-          swal.fire({
-            title: `<strong>Estado de Cliente</strong>`,
-            showCloseButton: true,
-            showConfirmButton: false,
-            html: ` <h3><span class="badge bg-danger"> CLIENTE CON ${rows[0]['mora']} DIAS DE MORA</span></h3>  `,
-          })
-
-          $("#cliente-mora").html(`<h5><span class="badge bg-danger"> CLIENTE CON ${rows[0]['mora']} DIAS DE MORA</span></h5>`)
+          if(rows[0]['mora'] > 0){
+            swal.fire({
+              title: `<strong>Estado de Cliente</strong>`,
+              showCloseButton: true,
+              showConfirmButton: false,
+              html: ` <h3><span class="badge bg-danger"> CLIENTE CON ${rows[0]['mora']} DIAS DE MORA</span></h3>  `,
+            })
+            $("#cliente-mora").html(`<h5><span class="badge bg-danger"> CLIENTE CON ${rows[0]['mora']} DIAS DE MORA</span></h5>`)
+          }else{
+            $("#cliente-mora").html('CLIENTE AL DIA !!')
+          }
         }
 
       })
@@ -1323,7 +1414,7 @@ async clienteMora(){
   }
 
  
-  keyPress(event: KeyboardEvent) {
+  keyPress(event: KeyboardEvent) { 
     const pattern = /[0-9]/;
     const inputChar = String.fromCharCode(event.charCode);
     if (!pattern.test(inputChar)) {
@@ -1335,13 +1426,10 @@ async clienteMora(){
   async accion(evento:string){
     if(evento === 'aprobar'){
       await this.subAprobar('GARANTIA' , $("#id").val() , 'APROBADO', localStorage.getItem('user'), $("#ot").val())
-      window.location.reload()
     }else if(evento === 'espera'){
       await this.subAprobar('GARANTIA' , $("#id").val() , 'PENDIENTE', localStorage.getItem('user'), $("#ot").val())
-      window.location.reload()
     }else if (evento === 'rechazar'){
       await this.subAprobar( 'GARANTIA' , $("#id").val() , 'RECHAZADO', localStorage.getItem('user'), $("#ot").val())
-      window.location.reload()
     }
   }
 
@@ -1386,26 +1474,36 @@ async clienteMora(){
     }else if(estado == 'ESPERA'){
       //si es rechazado debe ingresar un motivo por el rechazo
       var motivo = prompt("INGRESE MOTIVO de ESPERA !!!" );
-      if(motivo == null ) return ;
-      if(motivo.length == 0){
+      if(motivo === null ) return;
+      if(motivo.length === 0){
         swal.fire('No ingreso ningun motivo !!!');
-        return ;
+        return;
       }
       datos.push({name: 'motivo' , value: motivo });
-    }else if(estado == 'PENDIENTE'){
+    }else if(estado == 'APROBADO'){
       //si es rechazado debe ingresar un motivo por el rechazo
-      var motivo = prompt("INGRESE MOTIVO de ESPERA !!!" );
+      var motivo = prompt("INGRESE MOTIVO de APROBADO !!!" );
       if(motivo == null ) return ;
-      if(motivo.length == 0){
-        swal.fire('No ingreso ningun motivo !!!');
-        return ;
-      }
+      // if(motivo.length == 0){
+      //   swal.fire('No ingreso ningun motivo !!!');
+      //   return;
+      // }
       datos.push({name: 'motivo' , value: motivo }); 
     // }else if(estado == 'ENTREGADO'){ 
     //   if($("#TD"+solicitud+" tbody tr:contains(ESPERA)").length > 0 ){ 
     //     alert('Existen item en Espera actualice el estado del item de espera a Aprobado !! '); 
     //     return; 
     //   } 
+    }else if(estado == 'PENDIENTE'){    
+      //se agrego motivo de aprobacion ... 
+      var motivo = prompt("INGRESE MOTIVO de PENIENTE !!!" );
+      if(motivo == null ) return ;
+      if(motivo.length == 0){
+        swal.fire('No ingreso ningun motivo !!!');
+        return ;
+      }
+      datos.push({name: 'motivo' , value: motivo }); 
+
     }else{
 
            /* CONTROL ANTERIOR LOS ITEN RECHAZADO NO PUEDEN MODIFICARSE MAS... 
@@ -1420,9 +1518,9 @@ async clienteMora(){
     }
   
     console.log(datos);
-    var promesa = new Promise((resolve , reject )=>{
+    var promesa = new Promise(async(resolve , reject )=>{
         
-      $.post(URL + `/garantia-aprobacion`, datos  ) 
+      await $.post(URL + `/garantia-aprobacion`, datos  ) 
       .done(function( data ) { 
         console.log(data); 
         swal.fire('Datos Grabados correctamente...'); 
@@ -1450,18 +1548,19 @@ async clienteMora(){
         }
       }
       this.websocket.emit('pendientes', { 
-          mensaje: 'El '+ localStorage.getItem('area') +' '+ localStorage.getItem('nombre') +' ha modificado la Solicitud de OT NRO '+ ot +' en estado  '+ estado +' !!! ' , 
+          mensaje: 'El '+ localStorage.getItem('area') +' '+ localStorage.getItem('nombre') +' ha modificado la Solicitud de OT NRO '+ $("#ot").val() +' en estado  '+ $("#estado").val() +' !!! ' , 
           para: operario,
           area: area 
       });
       if(area === 'REPUESTO' || area === 'GARANTIA'){
-        await fetch(URL+"/garantia-chatId/" + operario )
+        await fetch(URL+"/garantia-chatId/" + localStorage.getItem('jefeGrupoChatId') )
         .then(response => response.json())  // convertir a json
         .then(async(json) => {
           const chatId = json[0].chat_id;
-          await fetch(URL +`/telegram-send?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${ot} motivo ${motivo}` )
+          await fetch(URL +`/telegram-send?chat_id=${chatId}&mensaje=${localStorage.getItem('area')} ${localStorage.getItem('nombre')} ha ${(estado=== 'PENDIENTE'? 'puesto en ESPERA' : estado)} la solicitud nro OT ${$("#ot").val()} motivo ${motivo}` )
             .then(response => response.json())  // convertir a json
             .then(json => console.log('se envio telegram....'))
+            .then(()=>{ window.location.reload() })
             .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
         })
         .catch(err => console.log('Solicitud fallida', err)); // Capturar errores 
@@ -1470,5 +1569,536 @@ async clienteMora(){
 
     });    
   }
+
+  async registroEvento(){
+    let timer = setInterval(async()=>{
+      if ($("#id").val() > 0 ){
+        await $.get( URL + "/garantia-log?solicitud=" + $("#id").val() ) 
+        .done(function( data ) { 
+          console.log('datos del log: ');
+          console.log(data['rows'][0]['fecha']); 
+          //swal.fire('Datos Grabados correctamente...'); 
+          var body = "";
+          for (let index = 0; index < data['rows'].length; index++) {
+            body += 
+              '<tr>'+ 
+                '<td>' + data['rows'][index]['fecha'] +'</td>'   +
+                '<td>' + data['rows'][index]['area'] +'</td>'    +
+                '<td>' + data['rows'][index]['estado'] +'</td>'  + 
+                '<td>' + data['rows'][index]['motivo'] +'</td>'  +
+                '<td>' + data['rows'][index]['usuario'] +'</td>' +
+              '</tr>'; 
+          }
+          $("#registros-log").html(body)
+          clearInterval(timer)
+        }) 
+        .fail(function(err) { 
+          //swal.fire('error recuperar los registros de observaciones.. ' + err , '', 'error' ); 
+        });  
+      }
+    }, 500)
+  }
+
+  async detalleSolicitud(){
+
+    let ot = $("#ot").val()
+    let vin = $("#vin").val();
+    //recuperamos datos de repuestos entregados 
+    let res = await fetch(`${URL}/garantia-repuesto/${ot}`)
+    let repuesto = await res.json()
+    console.log(repuesto)
+  
+    //recuperamos datos de los service
+    res = await fetch(`${URL}/garantia-servicios?vin=${vin}`)
+    let servicios = await res.json()
+    console.log(servicios)
+  
+    //recuperamos datos de los service
+    res = await fetch(`${URL}/garantia-mob/${ot}`)
+    let mob = await res.json()
+    console.log(mob)
+    
+  
+    await fetch(`${URL}/garantia-solicitudes?ot=${ot}&usuario=admin&area=ADMINISTRADOR&sucursal=${localStorage.getItem('sucursal')}`)
+          .then(response => response.json())
+          .then((res) => {console.log(res)
+            localStorage.setItem('idSolicitud', res.rows[0]['id'])
+            let plantilla = `
+              <style type="text/css">
+              *{
+                  margin:0;
+                  padding: 0;
+              }
+    
+              .container{
+                  display: grid;
+                  grid-template-columns: 1fr;
+                  /*grid-template-rows: 30px 0px 150px 550px 600px 150px;*/
+                  grid-template-rows: 30px 0px 150px auto auto auto;
+                  grid-gap: 5px;
+                  height: 99%;
+                  width: 100%;
+                  border-radius:5px;
+                  font-size: 12px;
+                  margin:auto;
+              }
+    
+              .titulo{
+                  text-align: center; 
+                  /* border-bottom: 1px solid #8b8b8b; */
+              }
+    
+              .titulo2{
+                  text-align: center; 
+              }
+              
+              .box1{ 
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  /* border: 1px solid #8b8b8b; */
+              }
+              .box1 .b1-col1, 
+              .box1 .b1-col2{ 
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  border-bottom: 1px solid #8b8b8b;
+              } 
+    
+              .box2{ 
+                  display: grid;
+                  grid-template-columns: 1fr;
+                  border: 1px solid #8b8b8b;
+                  border-radius: 5px;
+              }
+    
+              .box2 .b2-row1{
+                  padding-left: 10px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-around;
+              }
+    
+              .box2 .b2-row2{ 
+                  display: grid;
+                  grid-template-columns: 0.3fr 0.5fr 0.3fr 1fr;
+                  border-bottom: 1px solid #8b8b8b;        
+              }
+    
+              .b2-row2 * {
+                  display: flex;
+                  align-items: center;
+              }
+              
+              .b2-row2-col{
+                  border-right: 1px solid #8b8b8b;
+                  padding-left: 5px;
+              }
+              .b2-row2-col:nth-child(odd){
+                font-weight:bold;
+                background-color:#f4f4f5;
+              }
+    
+              .box3{ 
+                  display: grid;
+                  grid-template-columns: 0.5fr 0.3fr 1fr 1fr 1fr;
+                  border: 1px solid #8b8b8b;
+                  border-radius: 5px;
+              }
+    
+              .box3 .b3-row1-col1{
+                  padding-left:5px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  grid-column: span 1;
+                  background-color:#f4f4f5;
+                  border-right: 1px solid #8b8b8b;                
+                  border-left: 1px solid #8b8b8b;                
+              }
+  
+              .box3 .b3-row1-col2{
+                  padding-left:5px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  grid-column: span 4;
+                  border-right: 1px solid #8b8b8b;                
+              }
+  
+              .box3 .b3-row1-t{
+                  padding-left: 5px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  grid-column: span 5;
+                  font-weight:bold;
+              }
+    
+              .box3 .b3-row2{ 
+                  display: flex;
+                  align-items: center;
+                  justify-content: left;
+                  border-bottom: 1px solid #8b8b8b; 
+                  border-left: 1px solid #8b8b8b; 
+                  padding-left:5px;
+              }
+  
+              .box3 .b3-row2-empty{ 
+                display: flex;
+                align-items: center;
+                justify-content: left;
+                padding-left:5px;
+              }
+  
+              .title-detail{
+                background-color:#f4f4f5;
+                font-weight:bold;
+              }
+    
+    
+              .box4{ 
+                  display: grid;
+                  /*grid-template-columns: 0.2fr 0.4fr 1.5fr 0.1fr 0.2fr 0.7fr;*/
+                  grid-template-columns: 0.2fr auto auto 0.1fr 0.2fr auto auto;
+                  /* border-bottom: 1px solid #8b8b8b; */
+                  border: 1px solid #8b8b8b;
+                  border-radius: 5px;
+              }
+    
+              .box4 .b4-row1{
+                  padding-left: 10px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  grid-column: span 6;
+              }
+              .box4 .b4-row1-t{
+                  padding-left: 10px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  grid-column: span 7;
+                  font-weight:bold;
+              }
+    
+              .box4 .b4-row2{ 
+                padding-left: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: left;
+                border-bottom: 1px solid #8b8b8b; 
+                border-left: 1px solid #8b8b8b; 
+              }
+              .box4 .b4-row2-empty{ 
+                padding-left: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: left;
+              }
+              .box5{ 
+                  display: grid;
+                  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+                  border: 1px solid #8b8b8b;
+                  border-radius: 5px;
+              }
+    
+              .box5 .b5-row1{
+                  padding-left: 10px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  grid-column: span 4;
+              }
+              .box5 .b5-row1-t{
+                  padding-left: 10px;
+                  border-bottom: 1px solid #8b8b8b;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  grid-column: span 5;
+                  font-weight:bold;
+              }
+    
+              .box5 .b5-row2{ 
+                padding-left: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 1px solid #8b8b8b; 
+                border-left: 1px solid #8b8b8b; 
+            }
+            .box5 .b5-row2-empty{ 
+              padding-left: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+  
+              .box6{ 
+                display: grid;
+                grid-template-columns: 0.2fr 1fr 0.1fr 0.3fr;
+                border: 1px solid #8b8b8b;
+                border-radius: 5px;
+              }
+              .box6 .b6-row1{
+                padding-left: 10px;
+                border-bottom: 1px solid #8b8b8b;
+                /*display: flex;*/
+                align-items: center;
+                grid-column: span 4;
+                text-align:center;
+              }
+              .box6 .b6-row2{ 
+                padding-left: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-bottom: 1px solid #8b8b8b; 
+                border-left: 1px solid #8b8b8b; 
+              }
+  
+  
+  
+              @media print {
+                *:not(h2):not(#ot2) {font-size:10px;} 
+              }            
+  
+            </style>
+    
+            <div class="container">
+            <!-- titulo --> 
+            <div class="titulo">
+                <h2 class="title">SOLICITUD GARANTIA OT #</h2>
+            </div>
+            
+            <!-- cabecera 1 --> 
+            <div class="box1">
+            </div>
+    
+            <!-- cabecera 2 --> 
+            <div class="box2">
+  
+                <div class="b2-row2">
+                    <div class="b2-row2-col">FECHA RECEPCION: </div><div class="b2-row2-col" id="so-FOt"> </div> 
+                    <div class="b2-row2-col">FECHA CIERRE: </div><div class="b2-row2-col" id="so-fechaCierre"> </div> 
+                </div>
+                
+                <div class="b2-row2">
+                  <div class="b2-row2-col">KM ENTRADA: </div><div class="b2-row2-col" id="so-u_kmentrada"> </div> 
+                  <div class="b2-row2-col">KM CIERRE: </div><div class="b2-row2-col" id="so-kmCierre"> </div>
+                </div>
+    
+                <div class="b2-row2">
+                  <div class="b2-row2-col">FECHA VENTA: </div><div class="b2-row2-col" id="so-FVenta"> </div>
+                  <div class="b2-row2-col">CLIENTE: </div><div class="b2-row2-col" id="so-cliente"> </div>
+                </div>
+    
+                <div class="b2-row2">
+                    <div class="b2-row2-col">VIN: </div><div class="b2-row2-col" id="so-vin"> </div> 
+                    <div class="b2-row2-col">MODELO: </div><div class="b2-row2-col" id="so-modelo"> </div>
+                </div>
+    
+                <div class="b2-row2">
+                    <div class="b2-row2-col">VDN: </div><div class="b2-row2-col" id="so-vdn"> </div> 
+                    <div class="b2-row2-col">TIPO GARANTIA: </div><div class="b2-row2-col" id="so-tipoGarantia"> </div>
+                </div>
+    
+                <div class="b2-row2">
+                    <div class="b2-row2-col">JEFE GRUPO: </div><div class="b2-row2-col" id="so-nombreJefeGrupo"> </div> 
+                    <div class="b2-row2-col">MECANICO: </div><div class="b2-row2-col" id="so-mecanico"> </div>
+                </div>
+                <div class="b2-row2">
+                    <div class="b2-row2-col">ASESOR: </div><div class="b2-row2-col" id="so-asesor"> </div> 
+                    <div class="b2-row2-col">APROBADO POR: </div><div class="b2-row2-col" id="aprobadoPor"> </div> 
+                </div>
+                <div class="b2-row2">
+                    <div class="b2-row2-col">NRO RECLAMO: </div><div class="b2-row2-col" id="so-nroReclamo"> </div> 
+                    <div class="b2-row2-col">NRO PWA: </div><div class="b2-row2-col" id="so-nroPwa"> </div> 
+                </div>
+    
+            </div>
+    
+    
+            <!-- detalle 1 -->
+            <div class="box3">
+                <div class="b3-row1-t title-detail">DETALLE SOLICITUD</div>
+                <div class="b3-row1-col1"><strong>SINTOMA CLIENTE:</strong></div> <div class="b3-row1-col2" id="so-pedido"></div>
+                <div class="b3-row1-col1"><strong>SINTOMA TECNICO:</strong></div> <div class="b3-row1-col2" id="so-sintoma"></div>
+  
+                <!--cabecera detalle-->
+                <div class="b3-row2 title-detail">INCIDENTE</div>
+                <div class="b3-row2 title-detail">PIEZA CAUSAL</div>
+                <div class="b3-row2 title-detail">PIEZAS SOLICITADAS</div>
+                <div class="b3-row2 title-detail">DIAGNOSTICO TECNICO</div>
+                <div class="b3-row2 title-detail">REPARACION</div>
+    
+                <!--datos  col1 / col2  aqui va los detalles -->
+  
+  
+            </div>
+            <!-- detalle 2 -->
+            <div class="box4">
+                <div class="b4-row1-t title-detail">DETALLE REPUESTOS</div>
+    
+                <!--cabecera detalle-->
+                <div class="b4-row2 title-detail">REMISION</div>
+                <div class="b4-row2 title-detail">CODIGO</div>
+                <div class="b4-row2 title-detail">ARTICULO</div>
+                <div class="b4-row2 title-detail">CANT</div>
+                <div class="b4-row2 title-detail">FECHA</div>
+                <div class="b4-row2 title-detail">EMISOR</div>
+                <div class="b4-row2 title-detail">MECANICO</div>
+    
+                <!--datos  6 COL fila 1 -->
+                <!-- 
+                <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+                <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div> <div class="b4-row2">&nbsp;</div>
+                -->
+                
+            </div>
+    
+            <!-- detalle 2 -->
+            <div class="box5">
+                <div class="b5-row1-t title-detail">DETALLE MANTENIMIENTOS</div>
+    
+                <!--cabecera detalle-->
+                <div class="b5-row2 title-detail">ITEM</div>
+                <div class="b5-row2 title-detail">FECHA</div>
+                <div class="b5-row2 title-detail">SERVICE</div>
+                <div class="b5-row2 title-detail">KM</div>
+                <div class="b5-row2 title-detail">TALLER</div>
+                
+                <!--datos  4 COL fila 1 -->
+                <!-- <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div>
+                <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div> -->
+            </div>
+  
+            <!-- detalle 3 -->
+            <div class="box6">
+                <div class="b6-row1 title-detail">MANO DE OBRA</div>
+    
+                <!--cabecera detalle-->
+                <div class="b6-row2 title-detail">CODIGO</div>
+                <div class="b6-row2 title-detail">MOB</div>
+                <div class="b6-row2 title-detail">CANTIDAD</div>
+                <div class="b6-row2 title-detail">CODIFICADO POR</div>
+                
+                
+                <!--datos  4 COL fila 1 -->
+                <!-- <div class="b6-row2"></div><div class="b6-row2"></div><div class="b6-row2"></div><div class="b5-row2"></div>
+                <div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div><div class="b5-row2"></div> -->
+            </div>
+  
+  
+          </div>
+          <div class="boxButtons">
+            <button type="button" id="printSolicitud" onclick="imprimir()" class="btn btn-primary mt-3">Imprimir</button>
+            <button type="button" id="closePreview"class="btn btn-warning mt-3 text-center">Salir&nbsp;&nbsp;&nbsp;</button>
+          </div>
+            `      
+  
+              swal.fire({
+                html: plantilla, 
+                width: '100%',
+                showCloseButton: true,
+                showConfirmButton: false,
+                //run after show popup 
+                didOpen:()=>{
+                  //$(` #aprobadoPor`).text( log.filter(item=> item.estado === 'APROBADO')['usuario'] || '' )
+                  //recorremos la fila 
+                  res.rows.forEach(item=> {
+                    Object.entries(item).map(item=> {
+                      //insertamos datos en la cabecera box2
+                      if(item[0] === 'ot'){
+                        $(`.title`).text( 'SOLICITUD GARANTIA OT #' + String(item[1] || '').toUpperCase() )  
+  
+                      }else if(item[0] === 'fechaCierre'){
+                        $(` #so-${item[0]}`).text( String(item[1] || '').slice(0 , 10 ) )  
+                      }else{
+                        $(` #so-${item[0]}`).text( String(item[1] || '').toUpperCase() )  
+                      }
+                      // if(item[0] === 'comentario' && String(item[1]).length > 0 ){
+                      //   $(` #so-pedido`).text( $("#so-pedido").val() + ' \b ' +  String(item[1] || '').toUpperCase() )  
+                      // } 
+
+                    })
+                    
+                    //insertamos datos en el detalle solicitud box3 
+                    $(`.box3`).append(`<div class="b3-row2">${item.incidente}</div> <div class="b3-row2">${item.piezaCausal}</div> <div class="b3-row2">${item.repuesto}</div> <div class="b3-row2">${item.motivo}</div> <div class="b3-row2">${item.reparacion}</div>`)  
+                    //$(` #ot2`).text( "#"+ $("#so-ot").text() )
+                  })
+                  if(res.rows[0]['comentario'].length > 0 ){
+                    $(`#so-pedido`).text( $("#so-pedido").val() + ' \n ' + res.rows[0]['comentario'].toUpperCase() )
+                  } 
+
+
+                  // //agregamos los detalles faltantes 
+                  // if(res.rows.length < 20){
+                  //   let detalle1 = new Array(20 - res.rows.length).fill('<div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div> <div class="b3-row2-empty">&nbsp;</div>\n',0)
+                  //   detalle1.map(item=> $(`.box3`).append(item))
+                  // }
+  
+                  //detalle repuesto... 
+                  repuesto.remision.map(item=>{
+                    $(`.box4`).append(`<div class="b4-row2">${item.REMISION}</div> <div class="b4-row2">${item.CODIGO}</div> <div class="b4-row2">${item.ARTICULO}</div>
+                    <div class="b4-row2">${item.CANTIDAD}</div> <div class="b4-row2">${item.fecha}</div> <div class="b4-row2">${item.userCreate}</div> <div class="b4-row2">${item.firmado}</div> \n `)  
+                  })
+  
+                  // if(repuesto.remision.length < 20){
+                  //   let detalle2 = new Array( 20 - repuesto.remision.length).fill( `
+                  //   <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div>
+                  //   <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div> <div class="b4-row2-empty">&nbsp;</div>\n `)
+                  //   detalle2.map(item=> $(`.box4`).append(item))
+                  // }
+  
+                  //detalle de mantenimiento...
+                  servicios.rows.map(item=>{
+                    $(`.box5`).append( `<div class="b5-row2">${item.fila}</div><div class="b5-row2">${item.fecha}</div><div class="b5-row2">${item.servicio}</div><div class="b5-row2">${item.km}</div> <div class="b5-row2">${item.taller}</div> `)
+                  })
+                  
+                  // let detalle3 = new Array(5 - servicios.rows.length).fill( `<div class="b5-row2-empty">&nbsp;</div><div class="b5-row2-empty">&nbsp;</div><div class="b5-row2-empty">&nbsp;</div><div class="b5-row2-empty">&nbsp;</div>\n `)
+                  // detalle3.map(item=> $(`.box5`).append(item))
+  
+                  //detalle repuesto... 
+                  mob.map(item=>{
+                    $(`.box6`).append(`<div class="b6-row2">${item.codigo}</div> <div class="b6-row2">${item.descripcion}</div> <div class="b6-row2">${item.cantidad}</div> <div class="b6-row2">${item.user_ins}</div>\n `) 
+                  })
+                  if(mob.length === 0) $(`.box6`).append(`<div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div> <div class="b6-row2">&nbsp;</div\n `)  
+  
+                  //agregamos el evento imprimir al boton 
+                  document.getElementById('printSolicitud').addEventListener('click', () => { this.imprimir() });
+                  document.getElementById('closePreview').addEventListener('click', () => { swal.close() });
+                }
+              })
+          })
+          .then(async (x)=>{
+             let id = localStorage.getItem('idSolicitud')
+             res =  await fetch( URL + "/garantia-log?solicitud=" + id )
+             let log = await res.json();
+             $(`#aprobadoPor`).text( String(log.rows[ log.rows.length -1 ]['usuario']).toUpperCase() )
+          })
+  }
+  
+  imprimir(){
+    //alert('imprimir..')
+    $(".boxButtons").css('display', 'none') 
+    let html="<html>";
+    html+= document.getElementById("swal2-content").innerHTML;
+    console.log(html)
+    html+="</html>";
+    let printWin = window.open('','','left=0,top=0,width=auto,height=auto,toolbar=0,scrollbars=0,status  =0');
+    printWin.document.write(html);
+    printWin.document.close();
+    printWin.focus();
+    printWin.print();
+    //printWin.close();  
+    $(".boxButtons").css('display', 'block') 
+  
+  }
+
 
 }

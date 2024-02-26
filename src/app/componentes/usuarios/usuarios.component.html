@@ -76,7 +76,19 @@
                   </div>
               </div>
 
+              <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="exampleInputEmail1"><i class="fa fa-paper-plane" aria-hidden="true"></i> SUCURSAL:</label>
+                    <select name="idSucursal" id="idSucursal" class="form-control" required>
+                      <option value="1">KIA VICTORIA</option>
+                      <option value="2">KIA MRA</option>                         
+                      <option value="3">KIA AVAY</option>                        
+                    </select>
+                  </div>
+              </div>
+
             </div>
+
             <div class="row mr-1 ml-1 mb-3">
               <button type="button" id="abm" class="btn btn-primary" style="margin-left:auto;" (click)="crear()">Crear</button>
               <button type="button" id="cancelar" class="btn btn-danger ml-3" style="margin-right: 8px;" (click)="reset()"><strong>Cancelar</strong></button>

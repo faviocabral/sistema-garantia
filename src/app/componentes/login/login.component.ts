@@ -69,6 +69,7 @@ export class LoginComponent implements OnInit {
       var nombre = data['rows'][0]['nombre'];
       var area = data['rows'][0]['perfil'];
       var chat_id = data['rows'][0]['chat_id'];
+      localStorage.setItem('sucursal', data['rows'][0]['idSucursal'])
       this.auth.login(usuario,area, nombre , chat_id );
     })  
     .then(()=> {

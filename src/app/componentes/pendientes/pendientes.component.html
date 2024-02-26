@@ -91,8 +91,13 @@
       <div class="row">
         <form id="formBuscar" class="form-inline ml-2" style="width: 100%;" >
           <input type="text" id="buscar" class="form-control mb-2 mr-sm-2" placeholder="Ingrese Nro OT" (keyup.enter)="buscarOT(1)">
+          <select name="idSucursal" id="idSucursal" class="form-control mb-2 mr-sm-2" required>
+            <option value="1">KIA VICTORIA</option>
+            <option value="2">KIA MRA</option>  
+            <option value="3">KIA AVAY</option> 
+          </select>          
           <button type="button" (click)="buscarOT(1)" class="btn btn-primary mb-2 elevation-1"><strong>Buscar</strong></button>
-          <button type="button" (click)="pendientes()" class="btn btn-danger mb-2 ml-2 elevation-1"><strong>Refrescar</strong></button>
+          <button type="button" (click)="pendientes()" class="btn btn-danger mb-2 ml-2 mr-2 elevation-1"><strong>Refrescar</strong></button>
         </form> 
       </div> 
         <div class="table-responsive table-bordered" id="pendientes">
